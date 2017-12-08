@@ -1,0 +1,1472 @@
+%% ----------------------------------------------------------------
+%% 
+%% Deep Learning for Emotion Recognition in Cartoons 
+%% John Wesley Hill
+%% University of Lincoln
+%%
+%% ---------------------------------------------------------------- 
+
+% Set up the document.
+\documentclass[report, 11pt, oneside]{dissertation}
+
+% 'Harvard' Referencing
+\usepackage[style=authoryear-ibid, dateabbrev=false, urldate=long, maxcitenames=2, maxbibnames=10, backend=biber, natbib=true]{biblatex}
+\usepackage[labelfont=bf]{caption, subcaption}
+
+\bibliography{bibliography} % Add bibliography to document.
+
+% Biblatex further settings. (for Lincoln Harvard Style referencing)
+\DeclareFieldFormat[preprint]{title}{\textit{#1} [pre-print]}
+\DeclareFieldFormat*{title}{\textit{#1}}
+\DeclareFieldFormat*{edition}{\nth{#1} Edition}
+\DeclareFieldFormat*{url}{Available from  \mkbibacro{URL}\addcolon\space\url{#1}}
+\DeclareFieldFormat*{urldate}{%
+  [Accessed \thefield{urlday}\addspace%
+  \mkbibmonth{\thefield{urlmonth}}\addspace%
+  \thefield{urlyear}\isdot]}
+\DeclareNameAlias{default}{last-first}
+\DeclareNameAlias{sortname}{last-first}
+
+\renewcommand{\labelnamepunct}{\addspace} % Remove period after year.
+\setlength\bibitemsep{2.0\itemsep} % Separate reference items.
+
+\usepackage[british,english]{babel} % Needed to typeset language to British English.
+\usepackage{verbatim}  % Needed for the "comment" environment to make LaTeX comments
+\usepackage{graphicx} % To support graphics in EPS format.
+\graphicspath{{figures/}}  % Location of the graphics files (set up for graphics to be in PDF format)
+\usepackage{booktabs} % For making nice tables.
+\usepackage{tabularx} % For making nicer tables.
+\usepackage[super]{nth} % For making superscript 'nth' text.
+\usepackage{minted} % For syntax highlighting.
+\usepackage{cleveref} % For Clever references.
+
+
+% Dashed lines in tables.
+\usepackage{arydshln}
+\def\dashvertical{;{2pt/3pt}}
+\def\dashhorizontal{\hdashline[2pt/3pt]}
+\hypersetup{
+    colorlinks=false,
+    linkcolor=blue,
+    urlcolor=blue,
+    pdftitle={Deep Learning for Emotion Recognition in Cartoons},
+    bookmarks=true,
+    pdfpagemode=FullScreen,
+}% Colours hyperlinks in blue, but this can be distracting if there are many links.
+%% ----------------------------------------------------------------
+\begin{document}
+\frontmatter      % Begin Roman style (i, ii, iii, iv...) page numbering
+
+% Set up the Title Page
+\title  {Deep Learning for Emotion Recognition in Cartoons}
+\authors  {\texorpdfstring
+            {\href{}{John Wesley Hill}}
+            {John Wesley Hill}
+            }
+\addresses  {BSc Computer Science\groupname\\\deptname\\\univname\\}
+\date       {\today}
+
+\supervisor  {Stefanos Kollias}
+\studentid	 {HIL12379231}
+\subject    {}
+\keywords   {}
+\maketitle
+
+%% ----------------------------------------------------------------
+\lhead{\emph{Contents}}  % Set the left side page header to "Contents"
+\tableofcontents  % Write out the Table of Contents
+
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % It is better to have smaller font and larger line spacing than the other way round
+
+% The Abstract Page
+\addtotoc{Abstract}  % Add the "Abstract" page entry to the Contents
+\abstract{
+\addtocontents{toc}{\vspace{0.5em}}  % Add a gap in the Contents, for aesthetics
+
+\it{Emotion Recognition is a field that computers are getting very good at identifying; whether it's through images, video or audio. Emotion Recognition has shown promising improvements when combined with classifiers and Deep Neural Networks showing a validation rate as high as 59\% and a recognition rate of 56\%. The focus of this dissertation will be on facial based emotion recognition. This consists of detecting facial expressions in images and videos. While the majority of research uses human faces in an attempt to recognise basic emotions, there has been little research on whether the same deep learning techniques can be applied to faces in cartoons. The system implemented in this paper, aims to classify at most three emotions (happiness, anger and surprise) of the 6 basic emotions proposed by psychologists Ekman and Friesen, with an accuracy of \textbf{80\%} for the 3 emotions. Showing promise of applications of deep learning and cartoons. This project is an attempt to examine if emotions in cartoons can be detected in the same way that human faces can.}
+}
+
+\clearpage  % Abstract ended, start a new page
+%% ----------------------------------------------------------------
+
+\setstretch{1.3}  % Reset the line-spacing to 1.3 for body text (if it has changed)
+
+% The Acknowledgements page, for thanking everyone
+\acknowledgements{
+\addtocontents{toc}{\vspace{1em}}  % Add a gap in the Contents, for aesthetics
+\begin{flushleft}
+Throughout my time and dedication to finish this dissertation, I would like to thank the following people for their support and advice 
+\end{flushleft}
+\begin{itemize}
+	\item \textbf{Professor Stefanos Kollias}, my supervisor who provided so much support, advice and resources in my research.
+	\item \textbf{My family and friends} for their support and patience.
+	\item \textbf{The University of Lincoln Library}, in being able to provide the book \textit{`Modern Machine Learning Techniques and Their Applications in Cartoon Animation Research'} through their inter-library loan system, which I could not get a hold of myself.
+\end{itemize}
+}
+\clearpage  % End of the Acknowledgements
+%% ----------------------------------------------------------------
+
+\pagestyle{fancy}  %The page style headers have been "empty" all this time, now use the "fancy" headers as defined before to bring them back
+
+%% ----------------------------------------------------------------
+\lhead{\emph{List of Figures}}  % Set the left side page header to "List if Figures"
+\listoffigures  % Write out the List of Figures
+
+%% ----------------------------------------------------------------
+\lhead{\emph{List of Tables}}  % Set the left side page header to "List of Tables"
+\listoftables  % Write out the List of Tables
+
+%% ----------------------------------------------------------------
+\setstretch{1.5}  % Set the line spacing to 1.5, this makes the following tables easier to read
+\clearpage  % Start a new page
+\lhead{\emph{Abbreviations}}  % Set the left side page header to "Abbreviations"
+\listofsymbols{ll}  % Include a list of Abbreviations (a table of two columns)
+{
+\textbf{AFEW} & \textbf{A}cted \textbf{F}acial \textbf{E}xpression in the \textbf{W}ild\\
+\textbf{ANN} & \textbf{A}rtificial \textbf{N}eural \textbf{N}etwork\\
+\textbf{CNN} & \textbf{C}onvolutional \textbf{N}eural \textbf{N}etwork\\
+\textbf{DBN} & \textbf{D}eep \textbf{B}elief \textbf{N}etwork \\
+\textbf{FER-2013} & \textbf{F}acial \textbf{E}xpression \textbf{R}ecognition-\textbf{2013} \\
+\textbf{FFNN}& \textbf{F}eed \textbf{F}orward \textbf{N}eural \textbf{N}etwork\\
+\textbf{HDF5} & \textbf{H}ierarchical \textbf{D}ata \textbf{F}ormat \textbf{5}\\
+\textbf{HCI} & \textbf{H}uman \textbf{C}omputer \textbf{I}nterface\\
+\textbf{ILSVRC} & \textbf{I}mageNet \textbf{L}arge \textbf{S}cale \textbf{V}isual \textbf{R}ecognition \textbf{C}hallenge\\
+\textbf{IRNN} & \textbf{I}dentity \textbf{R}ecurrent \textbf{N}eural \textbf{N}etwork \\
+\textbf{MCP} & \textbf{M}c\textbf{C}ulloch--\textbf{P}itts Neuron\\
+\textbf{MGM} & \textbf{M}etro-\textbf{G}oldwyn-\textbf{M}ayer\\
+\textbf{MLP} & \textbf{M}ulti--\textbf{L}ayered \textbf{P}erceptrons\\
+\textbf{NLP} & \textbf{N}atural \textbf{L}anguage \textbf{P}rocessing\\
+\textbf{NTM} & \textbf{N}eural \textbf{T}uring \textbf{M}achine\\
+\textbf{NAG} & \textbf{N}esterov \textbf{A}ccelerated \textbf{G}radient\\
+\textbf{OpenCV} & \textbf{O}pen \textbf{C}omputer \textbf{V}ision library\\
+\textbf{PSF} & \textbf{P}ython \textbf{S}oftware \textbf{F}oundation\\
+\textbf{LSTM} & \textbf{L}ong \textbf{S}hort \textbf{T}erm \textbf{M}emory\\
+\textbf{ReLU} & \textbf{Re}ctified \textbf{L}inear \textbf{U}nit\\
+\textbf{RNN} & \textbf{R}ecurrent \textbf{N}eural \textbf{N}etwork\\
+\textbf{RMS} & \textbf{R}oot \textbf{M}ean \textbf{S}quare\\
+\textbf{SFEW} & \textbf{S}tatic \textbf{F}acial \textbf{E}xpression in the \textbf{W}ild\\
+\textbf{SDLC} & \textbf{S}oftware \textbf{D}evelopment \textbf{L}ife \textbf{C}ycle\\
+\textbf{SGD} & \textbf{S}tochastic \textbf{G}radient \textbf{D}ecent\\
+\textbf{TFD} & \textbf{T}oronto \textbf{F}ace \textbf{D}ataset\\
+\textbf{UAV} & \textbf{U}nmanned \textbf{A}erial \textbf{V}ehicle\\
+\textbf{XP} & e\textbf{X}treme \textbf{P}rogramming\\
+\textbf{XML} & e\textbf{X}tensible \textbf{M}arkup \textbf{L}anguage\\
+}
+
+%% ----------------------------------------------------------------
+\clearpage  %Start a new page
+\lhead{\emph{Nomenclature}}  % Set the left side page header to "Nomenclature"
+\listofnomenclature{lll}  % Include a list of Nomenclature (a three column table)
+{
+% symbol & name & unit \\
+$ \epsilon $ & A very small number \\
+$ *, \otimes, \circledast $ & Convolution \\
+$ \odot $ & Element-wise matrix-vector multiplication \\
+$ \nabla $ & Gradient \\
+$ \eta $ & Learning rate \\
+$ \gamma $ & Momentum term \\
+$ J(\theta) $ & Objective function \\
+$ \sigma(x) $ & Sigmoid function \\
+$ \sigma(\mathbf{z}) $ & Softmax function \\
+$ \{0,1\} $ & The set containing 0 and 1 \\
+$ \mathbb{Z} $ & The set of integer numbers \\
+$ \mathbb{R} $ & The set of real numbers \\
+$ \theta $ & Threshold value/Parameter \\
+}
+%% ----------------------------------------------------------------
+% End of the pre-able, contents and lists of things
+
+%% ----------------------------------------------------------------
+\mainmatter	  % Begin normal, numeric (1,2,3...) page numbering
+\pagestyle{fancy}  % Return the page headers back to the "fancy" style
+\setstretch{1.45}  % Set the line spacing to 1.45, this makes the following tables easier to read
+
+%% ---------------------------------------------------------------
+%%
+%% Introduction
+%%
+%% ---------------------------------------------------------------
+
+\lhead{\emph{Introduction}}
+\chapter{Introduction} \label{chap:introduction}
+
+\section{Outline}
+
+In this chapter, we introduce the project by exploring the related topics of emotion recognition and deep learning. The history of both subjects alongside a section explaining the motivation of this project is presented. The subject of animated cartoons is introduced, including an explanation of its history, previous research, relevance and importance to the context of emotion recognition and deep learning. The chapter closes by discussing the aims and objectives of the project plus a summary of the remaining chapters in this report.
+
+\section{History of Deep Learning}
+
+The area of Deep Learning traces back to the 1940's where artificial intelligence research was about to come to fruition. In 1943, neuroscientists Warren McCulloch and Walter Pitts proposed an artificial neuron known as the \textbf{McCulloch-–Pitts (MCP) neuron}. This neuron formed the basis of the first mathematical model of an artificial neuron. Its primary function is to have inputs $x_i$ that is multiplied by the weights $w_i$, and the neurons sum  the values $w_ix_i$ to create a weighted sum $ s $. If this weighted sum $ s $ is greater than a certain threshold θ, $ \theta $ then the neuron fires, otherwise not. \citep[41]{Marsland:2014:MLA:2692349}.
+
+The MCP neuron has some properties worth discussing. The inputs $x_i$ are binary (1 and 0) and the weights $w_i$ can be either positive or negative, between (-1 and 1), and the weighted sum formula is expressed mathematically as:
+
+\begin{equation} \label{eq:1}
+	s = \sum_{i = 1}^n w_i x_i
+\end{equation}
+
+The MCP neuron's threshold $ \theta $ is one example of an ``activation function", this is responsible for  ``firing" or activating a neuron. In the case for the MCP neuron, the activation function is a linear step  function (or more similarly a Heaviside function) \autocite[9]{wang:2017} the threshold activation function is mathematically expressed as:
+
+\begin{equation} \label{eq:2}
+{\displaystyle y = f(s)=\left\{{\begin{array}{rcl}1&{\mbox{for}}&s\geq\theta\\0&{\mbox{for}}&s< \theta\end{array}}\right.}
+\end{equation}
+
+
+When applied, the output $ y $ is binary (1 or 0) depending on the threshold criteria $ \theta $, the MCP neuron only produces a binary result in response. The MCP neuron can perform \textit{any} logical function using (AND, OR, NOT) by setting predetermined thresholds and inputs. Figure \ref{fig:mcpneuron} shows an example MCP neuron.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.5]{figure_1}
+	\caption{An example of the McCulloch-–Pitts (MCP) neuron.}
+	\label{fig:mcpneuron}
+\end{figure}
+
+ Although very basic, the MCP neuron was superseded by another model known as the $ \textbf{Perceptron} $.
+
+The perceptron is a linear classifier coined by Frank Rosenblatt in 1958 that is capable of classifying given inputs into two classes respectively. To put forward an example, as spam filter separating emails into \textit{``Spam"} and \textit{``Not Spam"} is a clear use case that a perceptron can solve.
+
+On the surface, Rosenblatt's perceptron shares some similarity with the MCP neuron. \citep[43]{Marsland:2014:MLA:2692349} puts it as ``nothing more than a collection of McCulloch and Pitts neurons together with a set of inputs and some weights to fasten the inputs to the neurons." However, there are still some differences between the two.
+
+Firstly, the perceptron includes an independent constant weight called the bias, which  
+is set to 1 or -1. The bias acts as an offset which shifts the input space away from the origin. Figure \ref{fig:perceptron} shows an example of a perceptron with a bias of 1.
+
+The MCP neuron only has binary outputs (1 or 0) and the perceptron outputs negative or positive values (+1 or -1). Interestingly, the most significant feature of the perceptron is its ability to \textbf{learn}, the MCP neuron cannot do this as \autocite[9]{wang:2017} states that ``The weights of [the MCP neuron] $ w_i $ are fixed, in contrast to the adjustable weights in [the] modern perceptron". From a biological standpoint, \citep{Rojas:1996:NNS:235222} argues the ineffectiveness of the MCP neuron stating that they are ``too similar to conventional logic gates".
+
+Perceptrons apply ``Hebbian Learning" to learn from data. Named after the psychologist Donald Hebb (under ``Hebb's Rule"), Hebb conjured that the link (weights) between two or more neurons strengthens or weakens given its firing activity. More specifically, ``...When an axon of cell A is near enough to excite a cell B and repeatedly or persistently takes part in firing it, some growth process or metabolic change takes place in one or both of the cells such that A's efficiency, as one of the cells firing B is increased" \citep[62]{hebb:1949}. In short, both \citep[211]{Lowel209} and \citep[21]{schatz1992developing} condense this rule succinctly: ``cells that fire together, wire together". Mathematically, The perceptron model is an adjusted formula from Equation \ref{eq:1}:
+ 
+\begin{equation} \label{eq:3}
+	s = \sum_{i = 1}^n w_i x_i + b
+\end{equation}
+
+Alongside the Hebbian Learning Rule for updating the weights of the perceptron:
+
+\begin{equation} \label{eq:4}
+	\Delta w_{ij} = \eta x_i y_j
+\end{equation}
+
+Where $ w_{ij} $ represents the weight change, and $ \eta $ represents the learning rate, as it is multiplied by the input weights $x_i$ and the output $y_j$. With this rule in place, the perceptron adjusts its weights based on the output of the network. 
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.5]{figure_2}
+	\caption{An example of the Perceptron.}
+	\label{fig:perceptron}
+\end{figure}
+
+Rosenblatt proposed a convergence theorem which proves that the perceptron will converge towards a solution such that the data will be separated by a finite number of iterations, given that the data is linearly separable. This notion was challenged by \citep{minsky69perceptrons} where they discussed the limitation of the perceptrons ability to solve the XOR (Exclusive OR) function and concluded that the XOR function was not linearly separable. \citep[170]{Ertel:2011:IAI:1971988} explains this issue further, ``...the XOR function does not have a straight line of separation. [Clearly,] the XOR function has a more complex structure than the AND function in this regard." Figure \ref{fig:xor_problem} graphically shows why the perceptron cannot solve the XOR problem.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.75]{figure_3}
+	\caption[The XOR problem.]{The XOR problem as depicted by \citep[170]{Ertel:2011:IAI:1971988} and challenged by \citep{minsky69perceptrons} Perceptrons can linearly separate the AND function but not XOR. ($ \bullet $ true, $\circ $ false) }
+	\label{fig:xor_problem}
+\end{figure}
+
+Since then, the XOR problem in perceptrons caused a major setback for neural network research, nicknamed the ``AI Winter". Only until the introduction of \textbf{Multi-Layer Perceptrons} (MLP) shown in Figure \ref{fig:mlp_xor} and backpropagation that this issue was eventually solved.
+
+Multi-Layer Perceptrons are different to single layer perceptrons as described above; the difference becomes clear with the introduction of the ``Hidden Layer". ``These internal layers are called ``hidden" because they only receive internal inputs and produce internal outputs." \citep[142]{Patterson:1998:ANN:521611} We call this type of network \textbf{Feed Forward Neural Networks} (FFNN) because each perceptron is interconnected and feeds information forward to the next layer of perceptrons, and that ``There is no connection among perceptrons in the same layer." \citep{Roberts:2017:Online}. 
+
+The MLP makes use of the backpropagation algorithm, although the algorithm is not exclusive to MLP's. The algorithm adjusts the weights of the network based on the ``errors" of the output layer. ``In this way, errors are propagated backwards layer by layer with corrections being made to the corresponding weights in an iterative manner" \citep{Patterson:1998:ANN:521611}. This process is called gradient descent which is key in backpropagation. \citeauthor{Ertel:2011:IAI:1971988} mentions that the weight update method is derived from the ``delta rule" (an alternative to Hebbian Learning) and uses a sigmoid function (see Equation \ref{eq:5}) as the activation function \citeyearpar[246]{Ertel:2011:IAI:1971988}. The sigmoid function $ \sigma(x) $ outputs a value within the range (0, 1) whereas the linear step function outputs a value in the exact range \{0, 1\}.
+
+\begin{equation} \label{eq:5}
+	\sigma(x) = \large\frac{1}{1 + e^{-x}} 
+\end{equation}
+
+The result of these constant weight readjustments is that the total error is reduced to a minimum. \citeauthor{Schmidhuber:2014cz} suggests that Paul Werbos was the first to apply an efficient backpropagation algorithm to neural networks in 1981 \citeyearpar[11]{Schmidhuber:2014cz} \citep[141]{Bishop:1995:NNP:525960} mentions that backpropagation came to prominence in a paper by \citep[2]{Rumelhart:1986:LIR:104279.104293} as an answer to the XOR problem, contending that ``...a two-layer system would be able to solve the problem.". To further their case, they argue that placing a single hidden unit changes the similarity structure of the network to allow the XOR function to be learned \citep[3]{Rumelhart:1986:LIR:104279.104293} and conclude with the statement that the ``...error propagation scheme leads to solutions in virtually every case."\citep[33]{Rumelhart:1986:LIR:104279.104293}.
+Backpropagation became a common technique in training neural networks and is still being used today.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.75]{figure_4}
+	\caption[A Multi-Layer Perceptron.]{A Multi-Layer Perceptron with an architecture described by \citep{Rumelhart:1986:LIR:104279.104293} to learn the XOR problem.}
+	\label{fig:mlp_xor}
+\end{figure}
+
+During the 1980’s and 1990's adding multiple layers to neural networks were showing promising results and led to breakthroughs in deep learning. The \textbf{Neocognitron} was one of those promising models proposed by Kunihiko Fukushima in 1980. The Neocognitron has two types of cells originally coined by \citep[109]{hubel1962receptive}, ``S-cells" (Simple cells) are used for feature extraction and ``C-cells (Complex cells) are used to recognise distinct features of a pattern regardless of distortion. \citep[193]{fukushima1980neocognitron} confirms this: ``The response of the C-cells of the last layer is not affected by the pattern's position at all." In short, the deepest layers in the Neocognitron are less sensitive to shift invariance.
+
+The \textbf{Convolutional Neural Network} (CNN) was introduced by \citeauthor{LeCun:NIPS1989_293} where it was applied on handwritten digits with a 1\% error rate. \citeyearpar[11]{LeCun:NIPS1989_293}. The network is known as  ``LeNet”, one of the first CNN’s. This successful result was due to handling ``...a variety of different problems of digits including variances in position and scale, rotation and squeezing of digits, and even different stroke width of the digit." \citep[39]{wang:2017}. These are attributes similar to the Neocognitron.  The LeNet advanced further with the introduction of the ``LeNet-5" by \citeauthor{LeCun:98}, being put to use on recognising handwritten digits with a 0.95\% error rate (without distortions) and an error rate of 0.8\% (with distortions) \citeyearpar[2288]{LeCun:98}. Figure \ref{fig:convnet} shows an example Convolutional Neural Network.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.45]{figure_5}
+	\caption[Convolutional Neural Network.]{A Convolutional Neural Network, this architecture is equivalent to the LeNet-5 architecture by \citep{LeCun:98}.}
+	\label{fig:convnet}
+\end{figure}
+
+
+A year before the CNN, another neural network, the \textbf{Long Short-Term Memory} (LSTM) Neural Network was invented to solve a specific problem. LSTM's is an evolved version of the \textbf{Recurrent Neural Network}; a network which has cycles, giving it the ability to handle sequential data one element at a time. \citep[2]{Lipton:2015tj}. \citeauthor{Lipton:2015tj} puts forward that RNN's are trained using \textbf{Backpropagation Through Time} (BPTT) and states that all RNN's apply it \citeyearpar[11]{Lipton:2015tj}. However, training RNN's was a challenge because of the ``vanishing/exploding gradient problem".
+
+ This phenomenon occurs when the RNN backpropagates errors across many time steps. As a result, ``[the] error signal decreases exponentially within the time steps the BPTT can trace back" \citep[53]{wang:2017} Indicating that learning becomes more difficult as the gradients get tiny over time. The reverse, exploding gradients ``can make learning unstable" \citep[282]{Goodfellow-et-al-2016}, Figure \ref{fig:vgp} shows an example RNN with an example of the vanishing gradient problem.
+ 
+ 
+ \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.65]{figure_6}
+	\caption[Recurrent Neural Network \& Vanishing Gradient Problem.]{(Left) An example of Recurrent Neural Network, (Right) An illustrated example of the ``Vanishing Gradient problem" with an unfolded RNN as described by \citep{Lipton:2015tj}. The gradients get smaller at each time step.}
+	\label{fig:vgp}
+\end{figure}
+
+ 
+ LSTM's are designed to address this problem; by introducing a ``memory cell" and gated units, enabling the network to remember information when it needs to selectively. The benefit is that previous sequences are remembered for an extended period without degradation, as opposed to the RNN. Figure \ref{fig:lstm} describes such an LSTM. \citeauthor{Hochreiter:1997:LSM:1246443.1246450} have shown that the LSTM can solve problems after 10 and 1000 time lags, in addition to outperforming other algorithms \citeyearpar[10-11]{Hochreiter:1997:LSM:1246443.1246450}. Meaning that LSTM’s are a good choice for learning time-dependent sequential data. Notable applications range from language translation, video captioning and speech recognition.
+ 
+  \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.65]{figure_7}
+	\caption[LSTM unit.]{Inside an LSTM unit where the gated units, input, output and forget are present.}
+	\label{fig:lstm}
+\end{figure}
+
+A breakthrough in 2006 led to the introduction of the \textbf{Deep Belief Network} (DBN) introduced by Geoffrey Hinton. DBN's are generative networks that pioneered a fast learning technique called ``Layerwise pre-training" that trains the network unsupervised from a bottom-up approach. ``[Intuitively], pre-training is a clever way of initialization" \citep[30]{wang:2017}. DBN's can attain good generalisation results. For example, it achieved an error rate of 1.2\% on am MNIST handwritten digit recognition task \citep{HinSal06} in which pre-training was an advantage: ``Pretraining helps generalization because it ensures that most of the information in the weights comes from [modelling] the images" \citep[507]{HinSal06}.  
+
+Since 2006, interest in deep architectures from the research community rose as computers got faster over time, with neural networks taking advantage of parallel processing, faster GPU’s, and huge amounts of data to break classification records. A deep CNN called ``AlexNet" built by \citeauthor{Krizhevsky2012} won the 2012 ``ImageNet" challenge with an error rate of 15.3\%, surpassing the second best entry error rate, 26.2\% and was trained on 2 GPU's for six days \citeyearpar[1]{Krizhevsky2012}. Interestingly, a novel optimisation technique AlexNet uses is called ``Dropout". It speeds up the training process and prevents overfitting by removing neurons from the network. "Dropout roughly doubles the number of iterations required to converge." \citep[6]{Krizhevsky2012}. AlexNet's success encouraged more deep CNN architectures to be created, such as VGGNet (OxfordNet), GoogLeNet, ResNet, etc.
+
+By glancing at the history of deep learning, it is apparent that there is promise in its potential to solve numerous problems. With inspiration from biology and in combination with the computational power of GPUs, neural networks today are being actively researched, One to consider are \textbf{Neural Turing Machines} (NTM) capable of learning basic algorithms such as copying and sorting. What’s more, \citeauthor{DBLP:journals/corr/GravesWD14} considers how the NTM resembles a human working memory system by comparing human based rules to simple programs, proposing that the NTM can learn to use it’s own memory. \citeyearpar[2]{DBLP:journals/corr/GravesWD14}. Despite this technology and more advancements like it being a few years or decades away, the popularity of deep learning remains strong in academia and industry.
+
+\section{History of Emotion Recognition}
+
+It is no surprise that emotion recognition originated from the study of ``emotions". \citeauthor{ERIHCI:911197} believes that it is examined in three major disciplines: psychology, biology and philosophy \citeyearpar[35]{ERIHCI:911197} and in the past had different definitions. Descartes focuses on passions and the soul, he refers to what we call emotions as \textit{``the passions"} and provides a definition: ``...we may define them generally as those perceptions, sensations or emotions of the soul which we refer particularly to it, and which are caused, maintained and strengthened by some movement of the spirits." \citep{descartes_1985}. Descartes proceeded to define the six primary passions: \textit{``wonder, love, hatred, desire, joy and sadness"} omitting the other remaining passions which he contests are related to the primary \citeyearpar[353]{descartes_1985}. Darwin instead focuses on facial expressions in emotions and argues from a biological perspective. He introduced the idea of ``serviceable habits" suggesting that emotions are adaptive. Evidence of this is shown by \citeauthor{hess2009darwin} as they argue that these serviceable habits lost their functionality as humans got more civilised, showing a sign of evolution. \citeyearpar[353]{hess2009darwin}.
+
+ The proper classification of distinct emotions was developed by psychologists Ekman and Friesen, where they hypothesised that emotions are universal across all cultures in humans via a stimulus test. The significance of this work indicated that any human could recognise and categorise one of or all of the six basic emotions. ``\textit{(happiness, sadness, anger, fear, surprise and disgust)}" \citep[124]{ekman1971constants}. This insight also confirms Darwin's hypothesis of emotion being universal and extends this to animals, as he summarises: ``We can thus also understand the fact that the young and the old of widely different races, both with man and animals, express the same state of mind by the same movements." \citep[352]{darwin1872expression}. 
+ 
+ The definition of Ekman's six basic emotions has been the standard benchmark for emotion recognition for computing devices and robots, developing a new field called ``Affective Computing" defined as ``...computing that relates to, arises from, or deliberately influences emotions." \citep{picard1997affective}. In the context of facial expression, Picard subscribes to Ekman's model researching facial expressions and computers attempting to recognise them, ``Presently, most attempts to automate recognition of facial expression are based on Ekman's system." \citep{picard1997affective}
+
+Applications in emotional recognition include a diverse array of areas; such as video games to understand the emotional state of a player playing a game. To online entertainment and marketing, to classify an emotion from a user when watching videos or advertisements to name a few. Emotion Recognition is researched extensively in \textbf{Human-Computer Interaction} (HCI) where it can be used to in health care to assess emotional status in patients \citep{Lisetti2003245} and as an aid in autism, to help children understand emotions around them. Notably, the rise of social media is also playing a role in emotion recognition, one of the most popular applications for it. In their analysis, \citeauthor{Roberts:2012ww} found that from a sample dataset of tweets, most shared either, disgust (16.4\%) and joy (12.4\%) or no emotion at all (57\%) \citeyearpar[3808]{Lisetti2003245}. By using Ekman's system as a specification for universal emotion and the introduction of affective computing, there is promise in the future that emotion recognition will show even more promising results in the future.
+
+\section{History of Animated Cartoons}
+
+Cartoons are simplified illustrations drawn to entertain children (comic books and children's books) to adults (political cartoons and caricatures). Cartoons are considered an extension of an illustrated book and have been recognised as an art form and even a career with the title ``Cartoonist". Despite the fact that cartoons started out in print, attempts to transform them rapidly took place in the early 20th century as ``Animated Cartoons".
+
+Much of the evolution of cartoons becoming animated is credited to many people, combined with their techniques and illusion to mimic the effect of a moving object. \'{E}mile Cohl who created the very first hand drawn animation in 1908 called \textit{`Fantasmagorie'}. The technique used to create the first full animated cartoon was borrowed from George M\'{e}li\`{e}s a French illusionist and filmmaker who invented the technique of ``stop motion". James Stuart Blackton an illustrator who combined M\'{e}li\`{e}s's stop motion and Winsor McCay the creator of \textit{`Gertie the Dinosaur'} were among one of the first animators in the field.
+
+Regarding technical achievements, \citeauthor{yu2013modern} mentions that Earl Hurd and John Bray created the way of efficiently coordinating the pre-production of an animation listing; composed transparent cels and a peg system for making working with backgrounds easier as examples, that are still in use today in animation \citeyearpar[107]{yu2013modern}. 
+
+From the 1920's onwards Walt Disney was the most influential pioneers in animation history, alongside his most notable creation and famous mascot ``Mickey Mouse". Disney considered the movies made by him to be experiments, one of them ``the usage of sound and colour in animation" \citep{yu2013modern} was in \textit{`Steamboat Willie'} in 1928.
+
+Animation historians marked the 1930s as the `Golden age of animation' where animated cartoon came in unison with Hollywood, popular culture and the mainstream through television. Major contributors in this period included ``Fleischer, Iwerks, Van Beuren, Universal Pictures, Paramount, [Disney], MGM and Warner Brothers" \citep{yu2013modern}. Onwards into the 1980s, the invention of personal computers moved animated cartoons from paper to pixels. As computers got better with computer graphics, Pixar introduced the first fully computer animated film \textit{Toy Story}.
+
+Since then, 3D animation became more popular and faster to create for feature length films from the big studios,  ``and desktop computer animation is now possible at a reasonable cost" \citep{yu2013modern}, with 2D animation getting popular on the internet in the 2000s.
+
+\section{Aim}
+
+It seems that the current progress in both deep learning and emotion recognition suggests that computers are tremendously getting more accurate at correctly classifying emotions in the mediums of videos, speech or images. The state of the art of emotion recognition is tested in the EmotiW (Emotion Recognition in the Wild) Challenge. 
+
+The purpose of this project is to measure how accurate a computer can correctly identify an emotion from a given set of images from a cartoon video. \textit{This project is an attempt to replicate their success and to find out if these deep learning techniques can be applied to learn specific information in cartoons, the area of interest is emotions}. This decision is based on the fact that cartoons are known to express a lot of emotion, especially in the characters, and the choice being `animated cartoons' is one where we can extract emotions from these characters in one or more videos.
+
+The ability for a computer to identify emotions in a cartoon would open more information to be extracted and analysed. Plus, it would explore what is possible with artificial intelligence, emotion recognition and especially animation. \citep{wang:2017} admits that ``Unfortunately, the computer animation community has not utilised machine learning as widely as computer vision" \citep[3]{wang:2017}. Although there has been some research in animation and machine learning, the current state of the art differs greatly and will be discussed in the background section.
+
+\section{Objectives}
+
+The fulfilment of the above aim of this project: \textit{`to measure how accurate a computer can correctly identify an emotion from a given set of videos'} requires the following set of objectives below to be met:
+
+\begin{enumerate}
+   \item \textbf{Discuss relevancy of Deep Neural Networks with relation to Emotion Recognition.}
+   \begin{itemize}
+     \item This just a detailed account of the strengths and weaknesses of the appropriate Deep Neural Networks for this report.
+   \end{itemize}
+   \item \textbf{Acquire, Clean, Label and Prepare the dataset.}
+   \begin{itemize}
+  	 \item The dataset will be most likely be generated from manually. e.g. YouTube, otherwise using a pre-trained dataset would suffice due to for time constraints if found.
+  	 \item If generating the dataset from a YouTube video, a cartoon must be selected for this purpose, with a justification.
+  	 \item A short account of the facial expressions selected for recognition will be presented.
+  	 \item A brief discussion of the image processing or computer vision techniques or algorithms will be presented.
+   \end{itemize}
+     \item \textbf{Design or Select an appropriate Deep Learning model, and create an implementation for training cartoon emotional analysis.}
+    \begin{itemize}
+  	 \item Depending on time constraints, a minimum of \textbf{3 emotions} for emotion recognition for eg. (happy, anger, and suprise). will be considered.
+  	 \item A short account of the selected software framework and how the model was trained will be discussed. 
+   \end{itemize}
+        \item \textbf{Evaluate the accuracy of the model and finalise the project.}
+     \begin{itemize}
+     	\item An analysis of the computer to identify emotions will be measured thoroughly in the evaluation.
+     	\item The report ends with a reflection and is finalised.
+   \end{itemize}
+\end{enumerate}
+
+\section{Structure of the rest of the report}
+
+\textbf{\Cref{chap:background}} discusses the background of the report going into a literature review of related work to this project. Some details of the deep learning architectures of the CNN, RNN and even some combinations of the two will be examined. A background and literature review of emotion recognition will be also discussed in this section as well. \textbf{\Cref{chap:methodology}} provides a short account of the recommended software development methodology chosen for this project plus the research methods. 
+	\textbf{\Cref{chap:implementation}} goes through the \textbf{Software Development Life Cycle} (SDLC) phases of the project including the tools used to produce the artefact.
+	\textbf{\Cref{chap:testing_evaluation}} is the penultimate phase that takes into account the optimisation algorithms used to discover the best algorithm for the dataset. The results are included in this section as well.
+	\textbf{\Cref{chap:reflection}} is a critical reflection of the overall project with a discussion using a risk matrix from the project proposal.
+	
+
+%% ---------------------------------------------------------------
+%%
+%% Background & Literature Review
+%%
+%% ---------------------------------------------------------------
+
+\lhead{\emph{Introduction}}
+\chapter{Background} \label{chap:background}
+\lhead{\emph{Background}}
+
+This project intends to link together three fields: animated cartoons, deep learning and emotion recognition. While the latter two fields have been researched in depth, little research of these two latter fields (emotion recognition and deep learning) in the context of animated cartoons have been explored. This chapter sets out to discover the case for why that is and to justify further the purpose of this project.
+
+\section{Related Work}
+
+\subsection{Emotion Recognition}
+
+For work in the area of emotion recognition, similar research into emotion detection \& sentiment analysis in images was conducted by \citep{Gajarla:us}. Their dataset was collected from the internet, specifically from online photo sites such as \textit{Flickr}, \textit{Tumblr} and \textit{Twitter}. For the categories to detect emotions they have chosen 5 emotions: ``Love, Happiness, Violence, Fear and Sadness." \citep[2]{Gajarla:us}. Some pre-trained CNN models were tested. VGG-ImageNet, VGG-Places205 and a ResNet-50 model were fine tuned to detect emotions in the dataset. They found that the ResNet-50 model produced a result of 73\% accuracy showing promise of only a fine tuned model. Interestingly, for the emotions `Sadness' and `Happiness' the model is able to learn faces from the dataset. However, ``We also observe that 80\% of the images that are tagged as happiness are face images. Hence this category is biased towards faces." \citep[3]{Gajarla:us}. Alternatively, the dataset for this project will consist of only faces showing facial expressions to keep the dataset fair.
+
+With any dataset, it may be worthwhile to see how other well established datasets perform in relation to other similar datasets in emotion recognition, in addition to learn how the dataset was constructed. \citep{Zafeiriou:2016kn} focused on surveying databases that have faces collected ``in the wild". That is, datasets that contain faces not produced in a strictly controlled setting, rather just publicly available faces hand annotated to a specific emotion. The datasets of interest to this project are datasets that contain facial expressions, \citeauthor{Zafeiriou:2016kn} attributes the most prominent datasets \textbf{Facial Expression Recognition 2013} (FER-2013) which was collected using Google Images and was constructed as greyscale 48 $ \times $ 48 faces containing the universal expressions, in addition with the neutral emotion with a total of 35,887 images. Both the \textbf{Acted Facial Expression In The Wild} (AFEW) and Static Facial Expression In The Wild (SFEW) datasets were used in the Emotion Recognition ``in-the-wild" challenges \citeyearpar[1490]{Zafeiriou:2016kn}, in relation to this, \citeauthor{Kahou:2015cr} used the FER-2013 dataset alongside additional datasets, such as the \textbf{Toronto Face Dataset} (TFD) and AFEW \citeyearpar[468]{Kahou:2015cr}. 
+
+However, \citep{Zafeiriou:2016kn} mentions that the AFEW and SFEW datasets only contain posed facial expressions from motion pictures that are annotated to only the universal expressions proposed by \citep{ekman1971constants}, stating that ``...[its] a taxonomy rarely that is considered too limited for modelling real-world emotional state". This observation was a challenge faced by both \citep{Gajarla:us} ``The problem of labelling images with the emotion they depict is very subjective and can differ from person to person." \citep[4]{Gajarla:us} and also \citep{Kahou:2015cr} ``We found that a fairly large number of training videos could be argued to show a mixture of two or more basic emotions" \citep[47]{Kahou:2015cr}. Extra care is needed for  animated cartoons since cartoons can display various emotions that can be ambiguous or even comprise of two different emotions. As a result the `neutral' emotion will not be classified in this project.
+	
+Applications in emotion recognition as \citeauthor{ERIHCI:911197} points out, include avoidance, alerting, production, tutoring and entertainment. This project would most likely fall in-between the applications of tutoring and entertainment. The former, because it could allow a computer to recognise an emotion in an animated cartoon automatically. It could generate subtitles (text or audio) explaining and teaching the emotions of the characters throughout the video to children. The latter for the fact that cartoons is a form of entertainment; to adults and especially children. For example, a recommendation system could be envisioned where an animated cartoon has a emotion rating outlining which characters possess various emotions in an episode.
+
+There will be issues with these applications, mainly with the systems that need to detect emotions, whether through speech or faces. \citeauthor{ERIHCI:911197} argues that deception is a hard challenge in detecting for computers \citeyearpar{ERIHCI:911197}. Since humans are capable of this, cartoons can also have characters that show forms of deception, which can confuse a system trying to recognise an emotion. Hence, ``...that means accepting that the system will be deceived as humans are" \citep{ERIHCI:911197}.	
+
+\subsection{Animated Cartoons}
+
+There exists some research in the area of machine learning and animated cartoons, however this research does not include any deep learning methods. Nevertheless, \citeauthor{wang:2017} mentions that manifold learning is a popular machine learning technique for animated cartoons and maintains a close relationship with animation research \citeyearpar[3]{wang:2017}. Manifold learning is a unsupervised learning method that transforms high dimensional data into a low dimension. The idea of this transformation is attractive in machine learning because ``It aims to reveal the intrinsic structure of the distribution measurements in the original high dimensional space" \citep{wang:2017}. \citeauthor{deJuan:2004ex} applied this by reusing existing cartoon data and re-sequencing the cartoon frames into a new animation, the low dimension manifold serves as a similarity graph of each frame of a cartoon \citeyearpar{deJuan:2004ex}. Both multi-layer neural networks and manifold learning can represent data in a non-linear fashion and according to \citeauthor{Rajanna:2016ux} can be combined together to boost classification accuracy \citeyearpar{Rajanna:2016ux}. While manifold learning is out of the scope of this report, deep architectures such as Deep Belief Networks (stacked \textit{Restricted Boltzmann Machines} (RBMs)) and Autoencoders could be explored further for animation.
+
+\section{Convolutional Neural Networks}
+
+Both animals and humans are extremely good at visual tasks, in fact \citeauthor{Russakovsky:2014vi} concluded from an evaluation of the ILSVRC's 5 year history that humans achieved a classification error of 5.1\% from an assortment of 1500 images \citeyearpar[31]{Russakovsky:2014vi}. In the past, computers were unable to perform these visual tasks until the introduction of the CNN.
+
+The CNN is a special type of neural network, it was first researched in the area of neuroscience with the inspiration of the animal visual cortex by \citep{hubel1962receptive}. \citep[247]{Goodfellow-et-al-2016} describes one of the many factors that made the CNN successful in computer vision tasks. Given a single image of a cat for example, skewing or distorting this image does not change the fact that the image contains a cat \citeyearpar[247]{Goodfellow-et-al-2016}. Humans understand this intuitive principle well, and so do CNN's, this property that CNN's have is called \textit{shift invariance}, the idea that an algorithm can distinguish features in an image; regardless if the image is shifted in large or small orders of magnitude. ``CNNs take this property into account by sharing parameters across multiple image locations." \citep[247]{Goodfellow-et-al-2016}, and in return this returns a great benefit for the network in that it ``...has enabled CNN's to dramatically lower the number of unique model parameters" \citep[247]{Goodfellow-et-al-2016}. In comparison to a fully connected network, (typical FFNN) overfitting is less likely in a CNN, because only local neurons are connected to each other and in turn the number of parameters are reduced. Figure \ref{fig:shared_weights} shows an illustration of parameter sharing, only local neurons that are close together share weights such as $ f_1 $ \& $ f_2 $. \citeauthor{Goodfellow-et-al-2016} recognises this added benefit, such that the network only has to learn one set of parameters rather than a separate set of parameters for each weight and is in turn computationally efficient \citeyearpar[328]{Goodfellow-et-al-2016}.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.65]{figure_8.pdf}
+	\caption[An illustrated example of parameter sharing.]{An illustrated example of parameter sharing (also called weight sharing). Each weight is shared to each feature map $ f_n $, this reduces the number of parameters in the network.}
+	\label{fig:shared_weights}
+\end{figure}
+
+As the name suggests, the word \textit{`Convolution'} is indeed derived from a mathematical operation, requiring two functions $ f $ \& $ g $ and producing another function $ h $ which is an integration of the amount of overlap of $ f $ as it is shifted over $ g $ \citep[36]{wang:2017}. Equation \ref{eq:6} describes this operation for a single dimension. Traditionally, convolving the functions $ f $ \& $ g $ is denoted as $ (f * g) $ although other notations $ (f \otimes g) $ or $ (f \circledast g) $ are sometimes used as well, mostly in signal processing. The formal notation will be used instead of the latter notations.
+
+\begin{equation} \label{eq:6}
+	h(t) = (f * g)(t) = \int_{-\infty}^{\infty}f(\tau)g(t-\tau)\ \mathrm{d}\tau
+\end{equation}
+
+ This operation has the property of commutativity, that is: $ (f * g) = (g * f) $. Along with the definition of convolution in Equation \ref{eq:6}, To prove this, a change in the integration variable $ \tau $ to become $ \tau \rightarrow t - \tau $, thus this is equivalent to:
+
+\begin{equation} \label{eq:7}
+	h(t) = (f * g)(t) = \int_{-\infty}^{\infty}g(t-\tau)f(\tau)\ \mathrm{d}\tau
+\end{equation}
+
+This proves that $ (f * g) = (g * f) $ only for the functions $f, g \in \mathbb{R}^n $ \citep[32]{Strichartz:2003tk}, this property is just a reverse operation of a signal but the reason for this will become clear later on.
+
+In the context of CNN's, one of the ways the convolution operation is best understood is in the domain of digital images. Thus, we will consider focusing on convolving over discrete functions rather than continuous functions such as analog signals in Equation \ref{eq:6}. The type of convolution needed for this kind of data is called a discrete convolution as shown in Equation \ref{eq:8}, the only difference to this equation is that the integral is now switched for the summation operator for digitised data, and that we use integers ($ \mathbb{Z} $) instead of real numbers ($ \mathbb{R} $). 
+
+\begin{equation} \label{eq:8}
+	h(t) = (f * g)(t) = \sum_{k={-\infty}}^{\infty}f(k)g(t-k)\
+\end{equation}
+
+However, this is still a one dimensional convolution; to work with digital images it is ideal to perform a 2D convolution. Such a convolution comprises of three parts, both of which apply to both images and CNNs: ``...the first argument (in this example [\ref{eq:8}], the function [f]) to the convolution is often referred to as the input and the second argument (in this example, the function [g]) as the kernel. The output is sometimes referred to as the feature map." \citep[322-323]{Goodfellow-et-al-2016}. In addition to the equation in Equation \ref{eq:8}, we would need to introduce a double summation to accommodate the matrix rows \& columns to convolve the kernel on. The result is Equation \ref{eq:9} in which the commutative property also holds true if $ I(m,n) \rightarrow I(i-m, j-n)  $ and $ K(i-m, j-n) \rightarrow K(m,n) $.
+
+\begin{equation} \label{eq:9}
+	H(i,j) = (I * K)(i,j) = \sum_{m} \sum_{n} I(m,n)K(i-m, j-n).
+\end{equation}
+
+ ``...the only reason to flip the kernel is to obtain the commutative property" \citep[323]{Goodfellow-et-al-2016}. One should take caution that the similar operation called cross correlation is the same as convolution without flipping the kernel \citep[324]{Goodfellow-et-al-2016}. The explanation of cross correlation is out of the scope of this article but Equation \ref{eq:10} demonstrates how similar it is to convolution. Another difference is that cross-correlation does not have a commutative property whereas convolution does.
+ 
+ \begin{equation} \label{eq:10}
+	H(i,j) = (I * K)(i,j) = \sum_{m} \sum_{n} I(m,n)K(i+m, j+n).
+\end{equation}
+
+  The important difference between the two is that convolution describes the \textit{ modification} of a signal whereas cross-correlation describes the \textit{similarity} of a signal. Convolving the kernel $ K $ over image $ I $ happens by sliding the kernel $ K $ over the input image for each row and column in the input image. The output of this operation from the kernel convolution is called a feature map. The three examples of this process are shown in Figure \ref{fig:2d_convolution} where the example kernel is a laplacian kernel mostly used in image processing to highlight edges in images.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=1]{figure_9.pdf}
+	\caption[An example of a 2D convolution.]{An example of a 2D convolution using an edge detection kernel.}
+	\label{fig:2d_convolution}
+\end{figure}
+
+Different kernels for 2D images can be used depending on what feature the CNN has to recognise, but what is certain is that the next stage after creating our feature map is to remove irrelevant features in the image. The CNN has a dedicated layer for this, called the pooling/subsampling layer. The idea behind this layer is to reduce the dimensions of the image and only keep the important features for further processing. 
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.65]{figure_10.pdf}
+	\caption[Max pooling.]{An example of dimensionality reduction, the input image is reduced with a 9x9 Max Pooling, note that the image is resized and downsampled after this stage.}
+	\label{fig:maxpool}
+\end{figure}
+
+Max pooling is a common example used by CNN's in dimensionality reduction. It simply returns the maximum pixel of an image from a region of $ M \times N $ pixels. Max pooling is not the only technique in reducing features, ``Other popular pooling functions include the average of a rectangular neighbourhood, the $L^2$ norm of rectangular neighbourhood, or a weighted average based on the distance from the central pixel." \citep[330]{Goodfellow-et-al-2016}. Figure \ref{fig:maxpool} shows an example of max pooling taking place on two images. This particular reduction layer is responsible for the CNN being invariant to small translations, \citeauthor{Goodfellow-et-al-2016} highlights this point, suggesting that in all cases pooling helps to transform the representation of an image to become invariant to small translations of the input. \citeyearpar[330]{Goodfellow-et-al-2016}. This powerful but simple technique means that no matter the image input, pooling deconstructs the image into a smaller representation that allows the network to only focus on the most important features even with a small shift of the input image. ``Invariance to local translation can be a useful property if we care more about whether some feature is present than exactly where it is." \citep[331]{Goodfellow-et-al-2016}. \citeauthor{Goodfellow-et-al-2016} goes further to provide examples of the features that CNN's look for regardless of location, such as whether an image contains a face or eyes, or corners of some edges we only need to know if a face or an edge \textbf{exists} and not to worry about the location of such features. \citeyearpar[331]{Goodfellow-et-al-2016}.
+
+
+If we take the example in Figure \ref{fig:maxpool}, the letter `\textit{A}' after it is convolved and pooled, shows a large highlighted region of white pixels. The CNN would most likely look for those edges to determine if it really is the letter `\textit{A}'. These edges are the features that the CNN would look for that are similar to Figure \ref{fig:shared_weights} most likely feature \textit{$f_1$}. After many layers of pooling and convolutions, the representation of the image would be reduced to the point that the image would not be recognisable prima facie. For this reason fully connected layers connect the reduced image pixels from the previous layer to a layer where neurons are interconnected to each other rather than sparse connections like CNN layers. We can get a better understanding of what sort of features the network will learn from the individual pixels in the fully connected layer.
+
+\begin{figure}[!htb]
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.45]{figure_11.pdf}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.65]{figure_12.pdf}
+	\end{subfigure}
+	\caption[Fully Connected Network \& ReLU.]{(Left) an illustrated example of two fully connected networks with an output layer and the class prediction labels. (Right) illustration of the ReLU activation function.}\label{fig:fully_connected_output_layers_relu}
+\end{figure}
+
+\begin{equation} 
+\begin{subequations}
+		\sigma(\mathbf{z})_j = \frac{e^{z_j}}{\sum_{k=1}^K e^{z_k}} \ \ \ \ \ \forall j \in 1...N
+\end{subequations}
+\begin{subequations} \label{eq:11}
+	\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x = max(0, x) 
+\end{subequations}
+\end{equation}
+
+The last layer of the network is called the output layer (also called the classification layer) lists all the predictions of what the input could be. Since the input could be either `\textit{A}', `\textit{B}' or `\textit{C}' we would need at least 26 output neurons to classify a single character from the alphabet (assuming only uppercase letters). Figure \ref{fig:fully_connected_output_layers_relu} shows an example of two fully connected layers and an activation function called a rectified linear unit or (ReLU). ReLU differs from the sigmoid function (see Equation \ref{eq:5}) in that it is not upper bounded between 0 or 1. But they are both similar in that their activation response is always non-negative, because both of these functions are always lower bounded at 0.
+
+There is an advantage for being strictly lower bounded to 0 in the case for the ReLU activation function, \citeauthor{Glorot:2011tm} argues that ReLU introduces a sparsity property, meaning that neurons with negative activations turn into `real zeros' that simply will not activate and pass through the network and can make data more linearly separable \citeyear[317]{Glorot:2011tm}. ReLU is truly closer to the activations inside a biological neruon as opposed to the sigmoid function, ``...rectifier units naturally lead to sparse networks and are closer to biological neurons` responses in their main operating regime." \citep[316]{Glorot:2011tm}. This has lead to the result that : ``...training proceeds better when the artificial neurons are either off or operating mostly in a linear regime." \citep[316]{Glorot:2011tm}. Equation \ref{eq:11} on the right shows the ReLU formula taking only the maximum value from 0 to $ x $. 
+
+But with all activation functions, \citep{Glorot:2011tm} issues a caution of ReLU: ``...forcing too much sparsity may hurt predictive performance for an equal number of neurons, because it reduces the effective capacity of the model" \citep[316]{Glorot:2011tm}. But despite this, ReLU is one of the most popular activation functions in use in deep neural networks. ``Deep convolutional neural net- works with ReLUs train several times faster than their equivalents with tanh units." \citep{Krizhevsky2012}
+
+For classification in the output layer, the softmax function is mostly used. Although softmax is visually similar to the sigmoid, they are dissimilar in function. The softmax function translates an input vector $ v $ into an array of probabilities for each vector. A good case for using this type of activation function is for multi-class classification rather than binary classification like sigmoid. For example in the case for Figure \ref{fig:softmax}, a vector of prediction probabilities for each character in the alphabet is returned when passed through the softmax function, the probabilities determines the most likely class label to be predicted. Equation \ref{eq:11} on the left shows the softmax equation.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.65]{figure_13.pdf}
+	\caption[An illustrated example of the softmax function.]{An illustrated example of the softmax function. Adding all the probabilities sums 1 for every character in the class label.}
+	\label{fig:softmax}
+\end{figure}
+
+
+This process repeats (from convolution to softmax) for a number of times until the maximum steps (or epochs) is reached. The first pass of the training process is known as a forward propagation, for brevity of this report, the backpropagation algorithm is not explained, rather the gradient descent optimisation algorithms that accompany it are in the testing \& evaluation section. 
+
+It should also be worth noting that CNN's are not only used in image based problems, \citeauthor{Hu:2015uo} applied CNN's to \textbf{Natural Language Processing} (NLP) by proposing a convolutional sentence matching model where the meaning of a sentence is summarised by performing convolution and pooling \citeyearpar{Hu:2015uo}. CNN's have become more complex than the ones shown in Figure \ref{fig:convnet} and Figure \ref{fig:softmax}, containing multiple subsampling and convolutional layers depending on the size of the dataset and problem.
+
+\section{ImageNet}
+
+The annual ImageNet challenge, (formally the ILSVRC challenge) was designed to assess the state of the art of computer vision by achieving a high degree of accuracy in image classification and object recognition. The dataset consists of over 14 million images (as hyperlinks) in more than 21,000 categories. The goal of the challenge is to classify 1000 images in 1000 categories from using a small portion of images from the ImageNet dataset.
+
+\textit{ImageNet Classification with Deep Convolutional Neural Networks} (or known as the `AlexNet' paper) authored by \citep{Krizhevsky2012} was a turning point in the ImageNet challenge that produced a winning error rate of 15.3\%, beating the previous record which was 26.2\%. Modern deep convolutional neural network architectures today improve and surpass AlexNet, such as VGGNet (OxfordNet), GoogLeNet, ResNet and the latest one to date, CUImage holds the record of 2.66\%. The choice of this paper was down to the fact that this was where the CNN was first used (and continues to be used) in this challenge and serves as the benchmark for image classification.
+
+ AlexNet's CNN architecture and others that are similar to it are worth exploring consisting of ``...eight layers with weights; the first five are convolutional and the remaining three are fully-connected." \citep{Krizhevsky2012}. \citeauthor{Krizhevsky2012} outlines the main architecture, the \nth{1} layer convolves the 224 $ \times $ 224 $ \times $ 3 input image with 96 kernels with size 11 $ \times $ 11 $ \times $ 3 and the image is pooled. The \nth{2} layer convolves the first layer with 256 kernels with size 5 $ \times $ 5 $ \times $ 48 that are then subsequently pooled. The \nth{3}, \nth{4}, \nth{5} contain the same width and height (3 $ \times $ 3) but with various depths, 256, 192, 192. The fully connected layers have 4096 neurons each with the output layer containing 1000 nerons. \citeyearpar{Krizhevsky2012}. Figure \ref{fig:alexnet} shows a simplified version of AlexNet. The network was split across two GPUs because one GPU was not enough to accommodate training 1.2 million training examples, It did have an advantage though: ``The two-GPU net takes slightly less time to train than the one-GPU net." \citep{Krizhevsky2012}.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.55]{figure_14.pdf}
+	\caption[AlexNet architecture.]{An illustrated and simplified example of the AlexNet architecture.}
+	\label{fig:alexnet}
+\end{figure}
+
+
+With the recent great successes of ImageNet classification, and alongside the introduction of the CNN in this challenge thanks to AlexNet, classifying images such as animals is very accurate and works very well. However, for the purpose of this project, the ImageNet database does not contain any cartoons as of writing. But the correct classification of some cartoons is minimal, although slightly promising. This has been tested on a sample of some cartoon images with the Inception model shown in Figure \ref{fig:inception} returning results with varying degrees of accuracy. One might argue that using transfer learning may help to alleviate the cartoon dataset, transfer learning is applying a pre-trained model onto another problem or domain. Transfer learning is effective for cartoons that contain single objects, shown in \ref{fig:inception}, however with some cartoon images where the cartoon is embedded in a setting it becomes near to ineffective. Furthermore, any model pre-trained on the ImageNet dataset is likely to incorrectly classify a cartoon object. For example a chair inside a cartoon would be harder to distinguish for a pre-trained ImageNet model than a cartoon chair alone, different architectures other than a CNN or training a whole new cartoon dataset needs to be taken into consideration.
+
+\begin{table}[]
+	\centering
+	\begin{tabular}{|l|l|}
+	\hline
+	Class                                         & Score            \\ \hline
+	\textbf{zebra}                                & \textbf{0.91752} \\ \hline
+	hartebeest                                    & 0.00153          \\ \hline
+	impala, Aepyceros melampus                    & 0.00104          \\ \hline
+	ostrich, Struthio camelus                     & 0.00099          \\ \hline
+	prairie chicken, prairie grouse, prairie fowl & 0.00075          \\ \hline
+	\end{tabular}
+	\caption{ImageNet classification of the zebra by \citep{randomlists.com} in Figure \ref{fig:alexnet}.}
+	\label{tab:zebra_results}
+\end{table}
+
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.55]{figure_16.pdf}
+	\caption[ImageNet classification on Cartoons.]{Classification of some cartoon images of chairs and animals. The model correctly classifies the orange couch (\nth{1} image \citep{openclipart_vectors:2013}) with \texttt{98\%} accuracy, and also classifies the \nth{4} image \citep{britton:2017} as a \texttt{rocking chair} at 35\% accuracy. However, apart from the \nth{1} image above, the percentages for all the other images are less than 50\%. On two occasions, the (\nth{3} \citep{shiplett:2013} \& \nth{6} \citep{warner_bros:2013}) images are misclassified as a \texttt{comic book}. The \nth{2} image \citep{rayner} is narrowly misclassified as a nail and the \nth{5} \citep{belortaja:2009} image is the lowest scoring image that misclassifies the cat with a \texttt{jigsaw puzzle} at 13\% accuracy. \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:inception}
+\end{figure}
+
+
+\section{Recurrent Neural Networks}
+
+Recurrent Neural Networks (RNNs) have shown to have great advantages on sequential data such as videos or speech, they work by ``...[processing] an input sequence one element at a time, maintaining in their hidden units a `state vector' that implicitly contains information about the history of all the past elements of the sequence." \citep{LeCun:2015dt} Compared to a traditional FFNN, RNN's take advantage of parameter sharing, just like the CNN, but differently. \citeauthor{Goodfellow-et-al-2016} points that the weights are shared across several timesteps \citeyearpar{Goodfellow-et-al-2016}. ``Each member of the output is a function of the previous members of the output. Each member of the output is produced using the same update rule applied to the previous outputs." \citep{Goodfellow-et-al-2016}, there is even a possibility they can be used in combination with CNN's to achieve high accuracy results in classification. 
+
+\citep{Kahou:2015cr} proposed a hybrid CNN-RNN architecture to predict facial expressions, plus they outline the inner workings of their architecture: ``In the first step, [a] CNN is trained to classify static images containing emotions. In the second step, we train an RNN on the higher layer representation of the CNN inferred from individual frames to predict a single emotion for the entire video." \citep[2]{Kahou:2015cr}. For the RNN component of the network, the LSTM was not considered, although they were aware of the vanishing/exploding gradient problem in RNNs. Instead, a specific RNN architecture called an \textbf{Identity Recurrent Neural Network} (IRNN) proposed by \citep{Le:2015vt} performs a weight initialisation trick to an identity matrix. Given this type of initialisation, ``...an RNN that is composed of ReLUs and initialized with the identity matrix...just stays in the same state indefinitely...when the error derivatives for the hidden units are backpropagated through time they remain constant provided no extra error-derivatives are added." \citep[2]{Le:2015vt}. This behaviour can have the effect of performing similarly to LSTMs as they further state: ``Their performance on test data is comparable with LSTMs, both for toy problems involving very long-range temporal structures and for real tasks like predicting the next word in a very large corpus of text."\citep[2]{Le:2015vt}. To summarise, using an IRNN architecture could be a simpler alternative to an LSTM, if one needs to tackle the long term dependencies problem that faces traditional RNNs. However, since \citep{Kahou:2015cr} did not test LSTM performance with an IRNN, IRNN might be a lesser choice as found by \citeauthor{Talathi:2015uv} which concluded that IRNN's have hidden nodes are very sensitive due to it's identity weight matrix initialisation thus resulting in varying hyperparameters for successful training \citeyearpar{Talathi:2015uv}. On the other hand LSTM's are arguably more complex than IRNNs and standard RNNs but achieve better results. In terms of emotion classification, the hybrid CNN-RNN architecture achieves a test accuracy of 52\%. While that CNN-RNN architecture is novel in of itself, it is very complex alone for this project and even may introduce overfitting despite it's proven ability to classify emotions. \citeauthor{Kahou:2015cr} recognised this in their due in part to the deep structure of the CNN, and reduced the network to a 3 layer network that alleviated the overfitting issue \citeyearpar{Kahou:2015cr}.
+
+
+%% ---------------------------------------------------------------
+%%
+%% Methodology
+%%
+%% ---------------------------------------------------------------
+
+\lhead{\emph{Background}}
+\chapter{Methodology} \label{chap:methodology}
+\lhead{\emph{Methodology}}
+
+This chapter covers the planning and the choice of software development methodology for the project. In addition to the research methods conducted to evaluate the model. This research is a planned account of what will be discussed in the evaluation section.
+
+\section{Project Management}
+
+\subsection{Trello}
+
+To aid the development of the artefact, the project management application \textit{`Trello'} was used to track the software development process, and in addition to this report as well. It is an online project planning tool that respects the common Kanban workflow in software projects. This workflow consists of primarily 3 main boards, \textit{Todo}, \textit{Doing} and \textit{Done}, this is shown in Figure \ref{fig:trello} showing the standard three boards in \textit{Trello}.
+
+ \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.45]{figure_17.pdf}
+	\caption[\textit{Trello} Board.]{An example of a \textit{Trello} board with the 3 main Kanban boards.}
+	\label{fig:trello}
+\end{figure}
+
+ But depending on the project and the team, more boards than the standard three can be added if required. In the context of this project, the project includes 5 boards, two of them are both in the \textit{Todo} section: \textit{Report (Todo)},  \textit{Artefact (Todo)},  \textit{Working on (This Week)},  \textit{Finished} and  \textit{Future Goals}. The \textit{Working on (This Week)} is key to the management of this project in Kanban. Tasks in progress are limited to around 3 or 4 tasks in the progress queue, this is also known as a WIP limit. ``Controlling the flow of development using the WIP limit will promote continuous development without wasted resources" \citep{Nakazawa:2016ip}. This constraint serves the purpose to maintain focus on the tasks that are being worked on, in this case on a weekly basis. Figure \ref{fig:trello_2} shows the project's Kanban board on \textit{Trello} once the task is completed for the week, it is placed onto the \textit{Finished} board. A \textit{Future Goals} board is added if there exists more time to add any features to the artefact. One can rearrange the \textit{Todo} tasks in terms of priority without affecting the \textit{Working on (This Week)} tasks this allows higher priority tasks to be flexibly rearranged without affecting the tasks that are currently in progress in the \textit{Working on (This Week)} board.
+ 
+ \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.55]{figure_18.pdf}
+	\caption[This project's \textit{Trello} board.]{The project's \textit{Trello} Board with 5 boards.}
+	\label{fig:trello_2}
+\end{figure}
+
+ As an example, producing deep learning visualisations may have higher priority than generating reports (If the visualisations for each optimisation algorithm should be included in the generated report) so they can be switched if need be, once any of the tasks on the \textit{Working on (This Week)} board is complete, then \textit{Visualisations} would be next to be worked on. ``Along with the changes in the state of the task, the task card is moved on the Kanban board from left to right." \citep{Nakazawa:2016ip}.
+
+For this project, a weekly basis was decided as a time boxing technique just to make sure there is a buffer of time to complete all three tasks in the \textit{Working on (This Week)} board. As a result, this allows a ongoing flow of tasks each week and new tasks can be added if any requirements are added during the duration of the project.
+
+\section{Software Development}
+
+For the project to succeed, the process in which the software must be built has to be iterative and flexible as opposed to a step-by-step and rigid method that the `waterfall' approach provided. This is summarised by \citep{Shaydulin:2017ty}, ``Waterfall typically requires a long time of requirements gathering and project planning before any code is written" \citep[5]{Shaydulin:2017ty}. It is ideal to consider a flexible approach because requirements within any stage of the software development process are subject to change.
+
+Since machine/deep learning is an iterative process that involves a lot of hyperparameter tweaking, an appropriate agile methodology is regarded. \citep{Goodfellow-et-al-2016} points out this fact: ``Our recommended methodology is to iteratively refine the baseline and test whether each change makes an improvement" \citep[429]{Goodfellow-et-al-2016}. Based on the requirements of this project, Kanban was chosen on the basis that the process is visual, straightforward and flexible. The Kanban board is the best known feature of this methodology that shows the visual progression of the project. ``In this way, the Kanban method visualizes the overall flow of development and the state of the tasks and continues to improve the process." \citep{Nakazawa:2016ip}. It is worth noting that other agile processes like Scrum and \textbf{eXtreme Programming} (XP) were considered for this project, both were unsuitable since they focus heavily on the customer through user stories, an attribute that this project does not require. Given that it is possible to combine Scrum and Kanban together (Scrumban) this combination would make the project more complex than it needed to be, and not all the processes would be followed given the time constraints of the project.
+
+\section{Research Methods}
+
+Since the project's aim is to measure how well the computer is able to identify an emotion, our method of research is through experimentation. The reason given for this choice is that \citep{Goodfellow-et-al-2016} argues that there is no `best' machine learning algorithm, and instead ``...our goal is to understand what kinds of distributions are relevant to the ``...real world" that an AI agent experiences, and what kinds of machine learning algorithms perform well on data drawn from the kinds of data generating distributions we care about."\citep[115]{Goodfellow-et-al-2016}
+ Once the emotions for each character is defined into a respective dataset with their labels, different training algorithms are tested at each trial run of the learning process. The algorithms that will be tested will be discussed further in the evaluation stage. For the dataset to be fair, it is best practice to split the dataset into \textit{Training} and \textit{Testing} datasets. The training dataset is used to teach the algorithm the correct label upon classification, the testing dataset is used to test if the algorithm has generalised well to the dataset and can be used to test data it has not seen before. It is worth pointing out that this is a crucial practice of machine learning, that no data from the test dataset should \textit{ever} be included in training. To avoid this, the data is explicitly separated into training and testing folders, for this project the data will be split 80\% training, 20\% testing.
+
+The experiment begins with a small dataset of emotions to see if the algorithm learns the emotions from the labeled data well. The algorithm that determines this is the cross-entropy loss function. In short, this loss function computes the distance between a predicted label that the computer has learned with the true label. Our goal is to minimise the loss function such that the probability of the predicted and true label are as close to each other as possible. To make sure that this is the case, a common method to tweak the network to get the best results is known as hyperparameter tuning. Since we are using a neural network, the amount of hyperparameter tuning can be very lengthy, so the amount of layers will be small then will gradually add more until the algorithm performs worse on the newly tuned parameters.
+
+Finally, the measurements that indicates how well each algorithm learned the emotions from the dataset is the ``model loss". Which indicates how close the neural network has converged towards representing the dataset. The aim for this metric is that it should be minimised or be comparable to the training set's performance, and the ``model accuracy" which indicates how accurate the neural network is at classifying the dataset, presumably the test set. The aim for this metric is that it must be maximised or be comparable to the training set's performance.
+
+%% ---------------------------------------------------------------
+%%
+%% Implementation
+%%
+%% ---------------------------------------------------------------
+
+\lhead{\emph{Methodology}}
+\chapter{Implementation} \label{chap:implementation}
+\lhead{\emph{Implementation}}
+
+This chapter covers the software development lifecycle of the project. Throughout the duration of this project, the required phases have been followed from start to completion.
+
+\section{Requirements}
+
+Before a dataset of emotion categories can be constructed, key two requirements must be met in order to progress onto the next stage, a suitable deep neural network must be selected to learn emotions on and an appropriate cartoon must be chosen to construct a dataset from. This stage was the first phase of this project.
+
+\subsection{Choice of Deep Neural Network}
+
+The choice of neural network was down to how relevant it is towards the aim, which is \textit{to measure how accurate a computer can correctly identify an emotion from a given set of images from a cartoon video}. that being said images are going to be worked on on the dataset. The neural networks in consideration are the CNN and the RNN. In short, the comparison of the two are that the CNN models over spatial data and the RNN models over temporal data. It is no surprise that the CNN as previously discussed in Chapter \ref{chap:background}, has proven to be successful in image related tasks and would be a excellent choice for the project over the RNN. Having considered even a amalgamation of the two CNN-RNN this would be even more effective on video related tasks. 
+
+However, it would slightly deviate from the original aim, to recognise an emotion from a set of images. Given this aim, choosing the CNN for the project would be more appropriate.
+
+\subsection{Choice of Animated Cartoon}
+
+There is a clear distinction between what type of cartoon the project needed to recognise emotions from. It was without a doubt it needed to be ``animated" since a lot of frames can be extracted and therefore processed later on. The animated cartoon also needed to show varying emotions throughout each episode so that there is enough data in the dataset for the emotions that need to be classified.
+
+\subsection{\textit{Tom \& Jerry}}
+
+\textit{Tom \& Jerry} is an animated cartoon series created by Hanna-Barbera under the production for \textbf{Metro-Goldwyn-Mayer} (MGM). The main characters of the cartoon consists of two characters that occur frequently in the series, \textit{Tom} \& \textit{Jerry}. Tom is the cat that usually goes after Jerry, the mouse in the cartoon that is being chased by Tom. Both of these characters can be argued to be the protagonists in the series. It is composed of 164 episodes averaging around 6 to 10 minutes per episode. Figure \ref{fig:tom_and_jerry} including both the two characters in the episode \textit{`Fit to be Tied' (1952)}.
+
+ \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.45]{figure_19.pdf}
+	\caption[A scene from \textit{Tom \& Jerry}.]{A scene from the animated cartoon \textit{Tom \& Jerry} Episode 69 - \textit{`Fit to be Tied' (1952)}. \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:tom_and_jerry}
+\end{figure}
+
+\textit{Tom \& Jerry} is an appropriate cartoon for this project because not only there are lots of episodes to build a large dataset from, but because both of the two main characters express various emotions in each of these episodes that can be selected and separated into their respective categories. Since both of the characters are not human, it would be interesting to find out whether the computer could recognise both of these characters emotions, even though their facial structure does not resemble that of humans, which have been proven to been detected in recent years.
+
+\subsection{Dataset Gathering}
+
+For this project, 64 episodes of \textit{Tom \& Jerry} were collected and processed on to create this dataset. A pre-made cartoon dataset was taken into consideration as an alternative, but was not taken further because a there did not exist a pre-made cartoon dataset of faces. In light of this, a dataset had to be created from scratch. 
+
+ \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.50]{figure_21.pdf}
+	\caption[\textit{YouTube} results for the query \texttt{`Tom \& Jerry'}.]{Results from the search query \texttt{`Tom \& Jerry'} on \textit{YouTube}. \copyright \ Warner Bros. Entertainment, Inc / Jonni Valentayn }
+	\label{fig:tom_and_jerry_dataset_gathering_1}
+\end{figure}
+
+Videos were collected and downloaded from the online video service \textit{YouTube}. \textit{YouTube} was chosen because it is the largest video service and search engine in the world after \textit{Google}, it was very likely that some \textit{Tom \& Jerry} episodes would be uploaded online. From the channel \textit{Joni Valentayn}. Of the 164 episodes of the series as of time of writing, only 99 videos were available on the channel. Since \textit{Tom \& Jerry} is indeed copyrighted, the length of each \textit{Tom \& Jerry} episode from YouTube is reduced by a almost a half. Figure \ref{fig:tom_and_jerry_dataset_gathering_1} shows the search results for the query \texttt{`Tom \& Jerry'} in the dataset gathering process and Figure \ref{fig:tom_and_jerry_dataset_gathering_2} shows a sample set of videos from the \textit{Joni Valentayn} channel online. The videos are roughly 3 minutes long, enough for a dataset of emotions for each episode.
+
+The videos were downloaded using a \textit{YouTube} downloading tool called \texttt{youtube-dl} in the MP4 format. The command used to download each video from the channel was:
+
+\begin{center}
+	\texttt{youtube-dl [YOUTUBE-VIDEO-ID]}
+\end{center}
+
+Where \texttt{[YOUTUBE-VIDEO-ID]} is the video's identifier on \textit{YouTube}. The videos were downloaded to a folder for further processing. Out of the 99 videos on the channel, 64 Tom \& Jerry videos were selected based on varying degrees of emotions in each episode for each character.
+
+ \begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.50]{figure_20.pdf}
+	\caption[Sample set of videos from the \textit{Joni Valentayn} \textit{YouTube} channel.]{Sample set of videos from the \textit{YouTube} channel \textit{Joni Valentayn}. The videos on this channel are roughly 3 minutes long in duration. \copyright \ Warner Bros. Entertainment, Inc / Jonni Valentayn}
+	\label{fig:tom_and_jerry_dataset_gathering_2}
+\end{figure}
+
+The full list of videos that have been used in the creation of this dataset is available in Table \ref{tab:dataset_videos_1} and Table \ref{tab:dataset_videos_2} of Appendix \ref{appendix:B}.
+
+\subsection{Face Segmentation}
+
+The best way to segment the cartoon faces from the collection of videos is by using Haar-like features to detect if a face is present, cropping and saving the cropped face to disk for each episode.
+
+\subsection{Haar-like features}
+
+Haar-like features have been used to detect objects in videos and images, but their primary and most used application is in detecting faces. They work by examining selected regions of an image, performing a summation on the pixels within one region of the image (white region), then subtracting the sum of the white region with another summed region of the image (black region). These special regions are key in detecting different features in images. Moreover, they come in different forms depending on what feature to detect. Figure \ref{fig:haar_like} shows the various features that can be detected in an image.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.50]{figure_22.pdf}
+	\caption[Different Haar-like features.]{Different Haar-like features that can be used to detect features in an image. The white rectangle is summed and subtracted against the summed result in the black rectangle.}
+	\label{fig:haar_like}
+\end{figure}
+
+The most common of algorithms for detecting faces  is the \textit{Viola-Jones Face detection algorithm}, which originally introduced the Haar-like features technique. Detectors slide over the target image such as the image in Figure \ref{fig:viola_jones}, The lines detect the nose, forehead and lighter regions. The rectangles detect the eyes and darker regions of the image. \citep{Viola:2001ks} proposed another algorithm to accompany their findings for Haar-like features, that is the integral image, which makes detecting Haar-like features more efficient. ``The integral image can be computed from an image using a few operations per pixel. Once computed, any one of these Harr-like features can be computed at any scale or location in constant time" \citep[1]{Viola:2001ks}.
+
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[scale=0.50]{figure_23.pdf}
+	\caption[Haar-like features detecting features in a face.]{Example of Haar-like features detecting features in a face in an image.}
+	\label{fig:viola_jones}
+\end{figure}
+
+However, during the development of this project it is very challenging to detect faces in cartoons. Many of the research in face detection is geared towards human faces, meaning that a face detector trained on detecting human faces would not be able to detect cartoon faces. Haar cascade training is a method that aims to detect any object from a video or an image by using a defined set of positive and negative sample images. The algorithm is similar to how the original Viola-Jones algorithm works, in that both of these algorithms use a machine learning technique called \textit{Boosting} which aims to combine multiple weak classifiers into a strong classifier. \textit{Adaboost} (Adaptive Boosting) is used among both of these family of ensemble learning algorithms: ``AdaBoost provides an effective learning algorithm and strong bounds on generalization performance" \citep[2]{Viola:2001ks}. The idea behind Adaboost in the context of the Viola-Jones algorithm is to ``...select the single rectangle feature which best separates the positive and negative examples" \citep[3]{Viola:2001ks}. This technique can be effectively transferred to train on any image.
+
+There exists pre-trained and ready to use Haar cascades online that can be used without re-training, but the ones that currently exist online can only detect human features, like eyes, lips, mouth and face. Therefore, a custom Haar cascade file needed to be trained on cartoon faces first before it can automatically segment faces in \textit{Tom \& Jerry}. Both the characters Tom and Jerry were chosen to have custom Haar cascades, this will be explained further in the implementation stage.
+
+\section{Design}
+
+The design stage was the second phase of the project which dealt with the selection of which emotions to classify, plus the architecture selection and parameters of the CNN, in addition to an overview of how the project is designed. 
+
+\subsection{Choice of emotions}
+
+Due to time constraints of segmenting every emotion from the 6 basic emotions, It was decided that the amount of emotions to be detected in the project had to be halved; only to contain: \textit{happy}, \textit{angry} and \textit{surprise}. This did lower the overall size of the dataset now that the emotions to be classified are only three.
+
+\subsection{Design of the artefact}
+
+The process of classifying the 3 chosen emotions is a two step process. The first process shown in Figure \ref{fig:design_1} uses the dataset collected from \textit{YouTube} alongside both Tom \& Jerry's custom Haar cascades, are segmented and cropped for each episode automatically. The images are manually annotated afterwards. This is done by placing a given segmented image of say \textit{happy} into a folder that corresponds with that emotion for each character. The result is 3 folders with the emotions \textit{happy}, \textit{angry} and \textit{surprise} for each character.
+
+\begin{figure}[!htb]
+   \centering
+	\includegraphics[scale=0.45]{figure_24.pdf}
+	\caption[The architecture of the \nth{1} step process, dataset construction \& segmentation.]{The architecture of the \nth{1} step process, dataset construction \& segmentation. \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:design_1}
+\end{figure}
+
+The second part of the two step process shown in Figure \ref{fig:design_2} was the classification process. From the newly created dataset of segmented images, the idea is to have 400 in each category. The images for each emotion are labelled using a sparse encoding scheme called 1-hot encoding. This encoding ensures that a sample image from the dataset is correctly annotated to one of the three emotions. ``If $x$ belongs to [category] i, then $h_i$ = 1 and all other entries of the representation $h$ are zero" \citep[146]{Goodfellow-et-al-2016}. The datasets for each emotion are labelled and are passed to the CNN which produces a softmax prediction of a given test image.
+
+\begin{figure}[!htb]
+   \centering
+	\includegraphics[scale=0.45]{figure_25.pdf}
+	\caption[The architecture of the \nth{2} step process.]{The architecture of the \nth{2} step process, classification. \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:design_2}
+\end{figure}
+
+\subsection{Design of the Convolutional Neural Network}
+
+The design of the CNN was based on how much data that was collected for each emotion. The architecture did not need to be too big otherwise it would overfit the data, too small and it would certainly underfit. It was decided to use either a 3 to 5 layer CNN architecture and ultimately choose the performant model. When the dataset is passed into the CNN network as an input, the images are resized to 60$\times$60 pixels with 3 channels (RGB) resulting in a final size of \textbf{60$\times$60$\times$3}. Dropout is applied at the end of the convolutions and max pooling; as a regularisation procedure to remove neurons and the network. ``One advantage of dropout is that it is very computationally cheap" \citep[257]{Goodfellow-et-al-2016}. The neurons are then flattened in preparation to become passed into the two fully connected layers. The first fully connected layer has 512 neurons with ReLU activation, and the last fully connected layer, (the output layer) has 6 neurons which are our emotions. 
+
+Since this project only focuses on only 3 emotions, it is expected that the output for the rest of the last three excluded emotions: \textit{sad}, \textit{fear} and \textit{disgust} would be zero. Despite this, the first 3 of the 6 neurons will represent \textit{happy}, \textit{angry} and \textit{surprise}. Due to our target image having the possibility of being either one of the three class labels, the softmax activation function is used for the last layer and cross entropy is used as the cost function. ``The use of cross-entropy losses greatly improved the performance of models with sigmoid and softmax outputs" \citep[219]{Goodfellow-et-al-2016}. 
+
+\section{Development}
+
+This stage covers the software development and the tools used when building the artefact. This was the third phase of the project.
+
+\subsection{Tools}
+
+The artefact was made using several tools that made the development quicker in terms of time and testing. The tools used in this project are outlined below with an explanation of it's effectiveness and adoption by community and industry.
+
+\subsubsection{Python}
+
+Python is an open source, general purpose programming language originally developed by Guido van Rossum (currently developed by the \textbf{Python Software Foundation} (PSF)) designed to be fast and expressive to both read and write in for experts and beginners. Readability is not only the main advantage that Python has over other programming languages, It has been widely embraced by the scientific community, often favoured over traditional programming languages such as C++, Fortran and Java. \citeauthor{Perez:2011tp} argues that an interactive environment is more suitable for scientists in terms of flexibility. For Python, it delivers immediate feedback when executing code, and this property is hard to express in conventional languages. \citeyearpar[14]{Perez:2011tp}. 
+
+With any programming language, the community support and software libraries play a factor in it's adoption. Python has a vast amount of scientific software libraries that are available online; most of which are open source and can work well with other languages such as C++. ``...it’s particularly good at interoperating with multiple languages" structures and with a syntax accessible to scientists who aren’t programmers. \citep[14]{Perez:2011tp}. 
+
+In the context of building the artefact, experimentation is quicker and easier in Python such that the prototype of the artefact can be developed and even moved onto another language. On the other hand it can also be argued that a solution can be entirely built in Python and that the scientific community can benefit since the code is readable and can be reproduced easily. In short, ``Python combines high-level flexibility, readability, and a well defined interface with low-level capabilities" \citep[15]{Perez:2011tp}.
+
+\subsubsection{OpenCV}
+
+OpenCV is an open source computer vision library developed in C/C++. Originally developed by Intel (currently developed by Itseez) that offers high performance media manipulation and object detection algorithms for applications ranging in image and video processing, robotics and mobile applications.
+
+The use of OpenCV is common for face detection and recognition applications and the library provides functionality for this. \citep{Jalled:2016vi} used the library for detecting faces using an \textbf{Unmanned Aerial Vehicle} (UAV). The usefulness of OpenCV is that is offers bindings to other languages, which means that `foreign' languages such as Python, Ruby, Java and Perl can take advantage of OpenCV without reinventing the wheel. The UAV face detection solution by \citeauthor{Jalled:2016vi} was developed in Python and OpenCV (with Python bindings) and prefers Python over the alternative, MATLAB because Python execution time is smaller than MATLAB and is more simpler \citeyearpar{Jalled:2016vi}.
+
+This artefact uses the OpenCV library in the dataset construction \& segmentation stage. The creation of the custom Haar cascades for both Tom and Jerry was made using OpenCV. Specifically the command line tools: \texttt{opencv\_createsamples} \& \texttt{opencv\_traincascade}. The first tool creates a training set of positive samples, the negative samples contains  anything \textbf{that is not in the positive samples} since including any would produce a higher rate of misclassification when attempting to recognise the cartoon faces. The second tool trains the classifier and generates the Haar cascade as an XML file to use within the OpenCV library.
+
+\begin{figure}[!htb]
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.28]{figure_26.pdf}
+	\end{subfigure}
+	\begin{subfigure}{0.5\textwidth}
+		\centering
+		\includegraphics[scale=0.35]{figure_27.pdf}
+	\end{subfigure}
+	\caption[Haar cascade training for positive images.]{Haar cascade training for positive images. The training process requires this separation of positive/negative to ensure that the face detector can determine between both characters faces for image segmentation.\\ (Left) Tom (Right) Jerry \\ \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:haar_positive_images}
+\end{figure}
+
+\subsubsection{Keras}
+
+Keras is a Python deep learning library which was developed by Fran\c{c}ois Chollet, with the intention of facilitating quick and rapid experimentation of building neural networks. Keras builds on top of two existing machine learning libraries Theano and Tensorflow.
+
+Although Theano is older than Tensorflow, Tensorflow has grown to be one of the most popular machine/deep learning libaries and is supported in by Google, the creators of the project. It is also similar to Theano. According to \citep{Abadi:2016vn}  Both Theano and Tensorflow have a `data-flow graph': ``TensorFlow uses a unified dataflow graph to represent both the computation in an algorithm and the state on which the algorithm operates"  \citep[1]{Abadi:2016vn} and goes on to further state: ``...[Theano's] programming model is closest to TensorFlow, and it provides much of the same flexibility in a single machine"\citep[2]{Abadi:2016vn}.
+
+Both of these libraries are powerful and are flexible compared to Keras, However, both have their disadvantages, Theano and Tensorflow are not modular in comparison to Keras. Meaning they are not suitable for prototyping neural networks. Defining a neural network in Keras is straightforward if not intuitive compared to Tensorflow/Theano.
+
+Since Keras is built on top of both Tensorflow and Theano, the choice of which `backend' library to use is up to the user. The artefact uses the Tensorflow backend since Keras has officially supported it. The version of Keras that the artefact uses is 2.0. This compatibility with Tensorflow is important, because it has more of a chance of researchers being able to reproduce results when running the code on a different machine without errors.
+
+\subsection{Cartoon Face Segmentation}
+The cartoon face segmentation tool is implemented in Python and the code is shown in Appendix \ref{appendix:A}. Put simply, for every character in the dataset, the tool processes an episode and reads each frame from the video. For every frame, the tool tries to detect a cartoon face using a custom Haar cascade file loaded into the program; created for both Tom and Jerry to be detected in the frame. Listing \ref{listing:haar_cascade} shows the code responsible for detecting faces in a frame.
+
+\inputminted[frame=single, firstline=39, lastline=53, baselinestretch=1, linenos]{python}{segmentation.py}
+\captionof{listing}{Haar cascade detector code for Tom \& Jerry. The \texttt{minNeighbors} parameter controls the minimum neighbours only different for Jerry because he has a smaller face than Tom.}
+\label{listing:haar_cascade}
+
+\begin{figure}[!htb]
+   \centering
+	\includegraphics[scale=0.45]{figure_28.pdf}
+	\caption[Before and after segmenting a region of a face]{Result before and after segmenting a region of a face from one frame of a video. \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:segmentation_1}
+\end{figure}
+
+\ \
+
+Figure \ref{fig:segmentation_1} shows the segmentation process for 1 frame in an episode and Figure \ref{fig:haar_positive_images} shows the Haar cascade training for previously segmented images. Sometimes other characters are detected in the video and are also segmented and saved into the dataset. This is where after the tool has finished processing one episode, the dataset has to be cleaned. This process just removes images that are not Tom or Jerry.  For the labelling process however, a further dataset cleaning has to be done to properly separate Tom and Jerry's emotions into different folders.
+
+\subsection{\textit{Tom \& Jerry} Image Dataset}
+After segmenting \textbf{159,035} images (593.5MB) (including Haar cascade positive images) from 64 episodes of \textit{Tom \& Jerry}, the total number of images segmented in the unlabelled dataset is \textbf{141,893} images (515.8MB). The dataset was further reduced to only 3 emotions, by selecting \textbf{400} training and test images in each emotion category, meaning \textbf{800} images (incl. test images) for each emotion. In total for 3 emotions of Tom \& Jerry, the final dataset contains \textbf{4,800} images, 15MB in size.
+
+\subsection{Training, Classification and Visualisation}
+
+The training/classification/visualisation tool is implemented in Python and the code is shown in Appendix \ref{appendix:C}. The training process begins by loading \textbf{1,200} images for both training and testing images for Tom and Jerry. In addition, their labels are also loaded and encoded in a 1-hot encoding scheme. Figure \ref{fig:design_2} shows an example of the scheme in the `1-Hot Encoding' section. The model of the CNN is loaded and trained by fitting the training set and labels to the test set and labels. The code for the CNN architecture described in the design stage is shown in Listing \ref{listing:cnn_model}. The code on Line 327 are the tested optimisers will be discussed in the evaluation stage. After training, the learned weights are saved into a model file. Keras uses \textbf{Hierarchical Data Format 5} (HDF5) (\texttt{.h5}) as the storage format to store it's models by default.
+
+\ \ \ \
+
+\inputminted[frame=single, firstline=311, lastline=339, baselinestretch=1, linenos, breaklines]{python}{train.py}
+\captionof{listing}{The designed CNN model in Python.}
+\label{listing:cnn_model}
+
+The tool can also perform emotion classification, although this happens almost immediately after the training process, the tool can classify any image as long as the trained weights exist. Either way, the tool loads the learned weights from the model file. Listing \ref{listing:cnn_model_probabilities} shows the predictions for the emotions.
+
+\inputminted[frame=single, firstline=353, lastline=356, baselinestretch=1, linenos, breaklines]{python}{train.py}
+\captionof{listing}{The code that predicts emotions from a randomly chosen image \textit{I} in the test dataset.}
+\label{listing:cnn_model_probabilities}
+
+\ \
+
+Line 288 returns the emotion prediction label as an array index, plus the probability of all emotions, which is the output of the last layer of the network. Line 290 returns the predicted emotion label, that uses the \texttt{np.argmax(x)} function. It takes an array and returns the array index containing the maximum value. Thankfully, the array that Line 290 takes in is one-hot encoded, that means that the array with a `1' inside is the array index of the emotion. For example: \texttt{np.argmax([0,0,1])} would return array index `2'. Finally the score is converted to a percentage, and the emotion class label prediction is later displayed on the screen. Figure \ref{fig:example_results} shows the output of the emotion classification, correct predictions are in green and incorrect predictions are in red.
+
+\begin{figure}[!htb]
+   \centering
+	\includegraphics[scale=0.65]{figure_29.pdf}
+	\caption[Result after multi-class classification.]{Result after multi-class classification. \copyright \ Warner Bros. Entertainment, Inc}
+	\label{fig:example_results}
+\end{figure}
+
+\ \ \ \
+
+Finally, the tool can produce convolution layer visualisations to better understand what features the CNN is learning. In Figure \ref{fig:cnn_visualisation} these visualisations were generated after 50 epochs of training, for 3 layers of the CNN. It is observed that the deeper convolution layers in network, the more filters get visualised. In the first visualisation there are many filters that are blank such as filter 0, 3 and 6. On the other hand, the second convolution layer shows more distinct features and patterns such as colour lines and grainy dots, it is more uniform than the first convolution visualisation. The visualisation of the output layer seems to be learning colours to associate with an emotion although more epochs in training may make it more clearer.
+
+\begin{figure}[!htb]
+   \centering
+	\includegraphics[scale=0.65]{figure_30.pdf}
+	\caption[Convolution visualisations.]{Convolution visualisations of the first, second and output layers.}
+	\label{fig:cnn_visualisation}
+\end{figure}
+
+%% ---------------------------------------------------------------
+%%
+%% Testing & Evaluation
+%%
+%% ---------------------------------------------------------------
+
+\lhead{\emph{Implementation}}
+\chapter{Testing \& Evaluation} \label{chap:testing_evaluation}
+\lhead{\emph{Testing \& Evaluation}}
+
+This chapter covers the evaluation stage where the artefact was tested against 5 optimisation algorithms to see which algorithm better fits the model. Other hyperparameters have been changed in the original artefact to find out if learning and generalisation would improve.
+
+\section{Preparation}
+
+As mentioned in the design stage, the dataset had to be split into 80\% training and 20\% testing. This partition is necessary because it shows how well the algorithm performs on the partitioned dataset rather than the whole. It tells us whether our algorithm is underfitting or overfitting without loading the entire dataset. It is common for the partition to be 70:30 or 80:20. Only the 80:20 split has been tested due to time constraints, although it was originally planned for this stage.
+
+ It is also a best practice to shuffle the dataset after it has been split. ``In cases such as these where the order of the dataset holds some significance, it is necessary to shuffle the examples before selecting minibatches" \citep[271]{Goodfellow-et-al-2016} and further states a warning for not performing this step: ``Failing to ever shuffle the examples in any way can seriously reduce the effectiveness of the algorithm." \citep[271]{Goodfellow-et-al-2016}. Listing \ref{listing:shuffle_split} shows the portion of code that is responsible for this procedure.
+
+\ \ \ 
+
+\inputminted[frame=single, firstline=222, lastline=242, baselinestretch=1, linenos, breaklines]{python}{train.py}
+\captionof{listing}{Code portion that shuffles and partition the dataset.}
+\label{listing:shuffle_split}
+
+It is worth noting that the results produced in this report have been assigned a fixed seed of \texttt{12379231}. This is to ensure that the results in this report can be reproduced.
+
+\section{Optimisation Algorithms}
+
+The optimisation algorithms are gradient based and are used in conjunction with backpropagation in the CNN. ``Gradient descent is a way to minimize an objective function $J(\theta)$ parameterized by a model's parameters $ \theta \in \mathbb{R}^d $ by updating the parameters in the opposite direction of the gradient of the objective function $ \nabla_\theta J(\theta) $ [with respect to] the parameters." \citep[1]{Ruder:2016tr}. The following optimisation algorithms that are tested and evaluated in the artefact are the following:
+
+\begin{itemize}
+  \item \textbf{Stochastic Gradient Descent} (SGD)
+  \item \textbf{Adagrad}
+  \item \textbf{Adadelta}
+  \item \textbf{RMSprop}
+  \item \textbf{Adam}
+\end{itemize}
+
+\subsection{Stochastic Gradient Descent}
+\textbf{Stochastic Gradient Descent} (SGD) is an optimisation algorithm that performs ``a parameter update for each training example $x^{(i)}$ and label $y^{(i)}$." \citep[2]{Ruder:2016tr}. In contrast to normal gradient descent methods such as batch gradient descent, that takes longer to converge towards the objective function for a number of steps, would be unsuitable for large datasets, whereas SGD is suitable. The iterative formula for learning rule for SGD is shown in Equation \ref{eq:12}.
+
+\begin{equation} \label{eq:12}
+	\theta = \theta -− \eta \nabla_\theta J(x(i); y(i); \theta).
+\end{equation}
+
+SGD uses a small portion of the training set to estimate the next gradient step, this step must be in the negative gradient of the objective function $ J(\theta) $. In turn, this is argued to converge faster than traditional gradient descent methods. However, the trade off is high variance in it's estimates, ``...that cause the objective function to fluctuate heavily" \citep[2]{Ruder:2016tr}.
+
+``Slightly modified versions of the stochastic gradient descent algorithm remain the dominant training algorithms for deep learning models today." \citep[15]{Goodfellow-et-al-2016} The variants of SGD such as Minibatch Gradient Descent, Momentum, and Nesterov Momentum are used as parameters in the training process and are not discussed due to sake of brevity. Instead, other optimisation algorithms that greatly improve upon SGD, in addition to having the adaptive learning property are discussed below. 
+
+\subsection{Adagrad}
+
+Adagrad (Adaptive gradient) is a gradient based optimisation algorithm, that uses a dynamic learning rate ``[which] assigns [a] higher learning rate to the parameters that have been updated more mildly and assigns [a] lower learning rate to the parameters that have been updated dramatically." \citep[54]{wang:2017}. Adagrad has an advantage as argued by \citeauthor{Ruder:2016tr} in that the use of an adaptive learning rate makes manual tuning redundant. This is evident in the gradient update rule in Equation \ref{eq:13}. For each $t$ timestep (epoch), the learning rate $\eta$ is changed by Adagrad and affects every parameter $\theta^t$. This is based on the previous gradients for $\theta^t$. \citeyearpar[6]{Ruder:2016tr}.
+
+\begin{equation} \label{eq:13}
+	\theta^{t+1} = \theta^{t} - \frac{\eta}{\sqrt{G_{t} + \epsilon}} \odot g_{t}
+\end{equation}
+
+ However, this comes at a cost, ``Adagrad’s main weakness is its accumulation of the squared gradients in the denominator", and goes on to further state: \citep{Ruder:2016tr}: ``This in turn causes the learning rate to shrink and eventually become infinitesimally small, at which point the algorithm is no longer able to acquire additional knowledge." \citep[6]{Ruder:2016tr} This means convergence to a minimum would be very slow for each epoch in the training process. Despite the problem of the excessively slow learning rate, \citeauthor{Goodfellow-et-al-2016} argues that Adagrad performs for some deep learning models but not all of them. \citeyearpar[299]{Goodfellow-et-al-2016}
+ 
+\subsection{Adadelta}
+
+Adadelta (Adaptive delta) is another gradient based optimisation algorithm that aims to solve the decreasing learning rate problem from Adagrad. According to \citeauthor{Zeiler:2012uw} accumulation of past gradients is restricted by using a fixed window size $w$ to ensure learning continues after many iterations \citeyearpar[3]{Zeiler:2012uw}. The final update rule for Adadelta is shown in \ref{eq:14}, the changes from the original Adagrad update rule is that the denominator now contains the \textbf{Root Mean Square} (RMS) of the gradients and the learning rate is replaced with the RMS error of the update parameters in the previous timestep (epoch) in the numerator.
+
+\begin{equation} \label{eq:14}
+	\Delta \theta_t = - \frac{RMS[\Delta \theta]_{t-1}}{RMS[g]_{t}} g_{t}
+\end{equation}
+\
+\begin{equation} \label{eq:15}
+	\theta_{t+1} = \theta_t + \Delta \theta_t
+\end{equation}
+
+\citeauthor{Ruder:2016tr} asserts that the latter replacement removes the dependency of a default learning rate in Adadelta. \citeyearpar[6]{Ruder:2016tr}
+
+\subsection{RMSProp}
+
+RMSProp (Root Mean Square Propagation) is a similar gradient based optimisation algorithm to Adadelta, but were independently developed with the same goal as an alternative to Adagrad. 
+
+The idea behind RMSProp is to ``...[change] the gradient accumulation into an exponentially weighted moving average" \citep[299]{Goodfellow-et-al-2016}. The interesting property of the $\rho$ parameter in RMSProp is a hyperparameter according to \citeauthor{Goodfellow-et-al-2016} that controls the length scale of the moving average window, and further states that RMSProp is used in practice as one of the recommended optimisers \citeyearpar[301]{Goodfellow-et-al-2016}.
+
+\subsection{Adam}
+
+From it's name, `Adam' stands for `Adaptive moments' and is a recent gradient optimisation algorithm that uses two moments, (\nth{1} and \nth{2} order moments) to compute ``adaptive learning rates for different parameters" \citep[1]{Kingma:2014us}. This is an advantage for Adam because it makes the algorithm more likely to converge quicker.
+
+It is argued that Adam shares resemblance to RMSProp and Adadelta. \citep{Ruder:2016tr} explains this similarity, ``...like Adadelta and RMSprop, Adam also keeps an exponentially decaying average of past gradients" \citep[7]{Ruder:2016tr}. But Adam's primary difference is that it uses momentum to provide faster minimisation.  ``The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients" \citep[1]{Kingma:2014us}. The moments estimated by Adam are known as $m_t$ (moving average gradient) and $v_t$ (squared gradient). Equation \ref{eq:16} shows the update rule for Adam.
+
+\begin{equation} \label{eq:16}
+	\theta_{t+1} = \theta_{t} - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t
+\end{equation}
+
+An important difference and advantage for Adam is the inclusion of a bias correction step. \citeauthor{Goodfellow-et-al-2016} mentions that RMSProp with momentum is the closest optimiser to Adam, but lacks bias correction, meaning that RMSProp with momentum may have high bias during training and recommends Adam for being robust to the choice of hyperparameters \citeyearpar[302]{Goodfellow-et-al-2016}.
+
+\section{Results}
+
+The dataset was trained on one GPU (Nvidia GeForce GTX 970) with a limit of 50 epochs per test run. In total, 5 test runs were made for each optimiser in which the hyperparameters were changed for each test run.
+
+The hyperparameters that were changed all through the test runs are the following:
+
+\begin{itemize}
+  \item \textbf{Learning rate}
+  \item \textbf{Max pooling size}
+  \item \textbf{Hidden Layer size}
+  \item \textbf{Dropout percentage}
+\end{itemize}
+
+
+A hyperparameter and value in \textbf{bold} indicates the changed parameter for the test run. An algorithm in \textbf{bold} indicates the best model in the algorithm comparison. A lower model loss and a higher accuracy is best.
+
+\subsection{Run 1}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		Parameter               & Value                     \\ \hline
+		1st Layer               & 3x3 Convolution           \\ \hline
+		2nd Layer               & 2x2 Maxpooling            \\ \hline
+		Dropout                 & 20\%                      \\ \hline
+		Neurons in 1st FC Layer & 512                       \\ \hline
+		Neurons in 2nd FC Layer & 6                         \\ \hline
+		Metric                  & Categorical Cross-Entropy \\ \hline
+		Epochs                  & 50                        \\ \hline
+		\end{tabular}
+	\caption{Hyperparameter Table, Run 1.}
+	\label{tab:parameters_1}
+\end{table}
+
+
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+		Algorithm    & Model Loss     & Model Accuracy \\ \hline
+		Adadelta     & 1.3\%          & 0.8\%          \\ \hline
+		Adagrad      & 10.7\%         & 0.3\%          \\ \hline
+		Adam         & 1.3\%          & 0.8\%          \\ \hline
+		RMSProp      & 10.7\%         & 0.3\%          \\ \hline
+		\textbf{SGD} & \textbf{0.8\%} & \textbf{0.8\%} \\ \hline
+		\end{tabular}
+	\caption{Results Table, Run 1.}
+	\label{tab:results_1}
+\end{table}
+
+\ \
+
+\begin{figure}[H]
+   \centering
+	\includegraphics[scale=0.20]{figure_31.pdf}
+	\caption{Results Graphs, Run 1.}
+	\label{fig:results_graphs_1}
+\end{figure}
+	
+\subsection{Run 2}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		Parameter               & Value                     \\ \hline
+		1st Layer               & 3x3 Convolution           \\ \hline
+		2nd Layer               & 2x2 Maxpooling            \\ \hline
+		\textbf{Dropout}        & \textbf{50\%}             \\ \hline
+		Neurons in 1st FC Layer & 512                       \\ \hline
+		Neurons in 2nd FC Layer & 6                         \\ \hline
+		Metric                  & Categorical Cross-Entropy \\ \hline
+		Epochs                  & 50                        \\ \hline
+		\end{tabular}
+	\caption{Hyperparameter Table, Run 2.}
+	\label{tab:parameters_2}
+\end{table}
+
+
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+		Algorithm    & Model Loss     & Model Accuracy \\ \hline
+		Adadelta     & 1.4\%          & 0.7\%          \\ \hline
+		Adagrad      & 1.0\%          & 0.8\%          \\ \hline
+		Adam         & 1.9\%          & 0.7\%          \\ \hline
+		RMSProp      & 1.5\%          & 0.8\%          \\ \hline
+		\textbf{SGD} & \textbf{0.9\%} & \textbf{0.8\%} \\ \hline
+		\end{tabular}
+	\label{tab:results_2}
+	\caption{Results Table, Run 2.}
+\end{table}
+	
+\ \
+
+\begin{figure}[H]
+   \centering
+	\includegraphics[scale=0.20]{figure_32.pdf}
+	\caption{Results Graphs, Run 2.}
+	\label{fig:results_graphs_2}
+\end{figure}
+
+\subsection{Run 3}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		Parameter               & Value                     \\ \hline
+		1st Layer               & 3x3 Convolution           \\ \hline
+		2nd Layer               & 2x2 Maxpooling            \\ \hline
+		\textbf{3rd Layer}      & \textbf{3x3 Convolution}  \\ \hline
+		\textbf{2nd Layer}      & \textbf{2x2 Maxpooling}   \\ \hline
+		Dropout                 & 20\%                      \\ \hline
+		Neurons in 1st FC Layer & 512                       \\ \hline
+		Neurons in 2nd FC Layer & 6                         \\ \hline
+		Metric                  & Categorical Cross-Entropy \\ \hline
+		Epochs                  & 50                        \\ \hline
+	\end{tabular}
+	\caption{Hyperparameter Table, Run 3.}
+	\label{tab:parameters_3}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+		Algorithm    & Model Loss     & Model Accuracy \\ \hline
+		Adadelta     & 1.9\%          & 0.8\%          \\ \hline
+		Adagrad      & 10.2\%         & 0.4\%          \\ \hline
+		Adam         & 1.1\%          & 0.8\%          \\ \hline
+		RMSProp      & 2.1\%          & 0.8\%          \\ \hline
+		\textbf{SGD} & \textbf{1.0\%} & \textbf{0.8\%} \\ \hline
+		\end{tabular}
+	\caption{Results Table, Run 3.}
+	\label{tab:results_3}
+\end{table}
+
+\ \
+
+\begin{figure}[H]
+   \centering
+	\includegraphics[scale=0.20]{figure_33.pdf}
+	\caption{Results Graphs, Run 3.}
+	\label{fig:results_graphs_3}
+\end{figure}
+
+\subsection{Run 4}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		Parameter               & Value                     \\ \hline
+		1st Layer               & 3x3 Convolution           \\ \hline
+		2nd Layer               & 2x2 Maxpooling            \\ \hline
+		3rd Layer               & 3x3 Convolution           \\ \hline
+		4th Layer               & 2x2 Maxpooling            \\ \hline
+		\textbf{5th Layer}      & \textbf{3x3 Convolution}  \\ \hline
+		\textbf{6th Layer}      & \textbf{9x9 Maxpooling}   \\ \hline
+		\textbf{Dropout}        & \textbf{50\%}             \\ \hline
+		Neurons in 1st FC Layer & 512                       \\ \hline
+		Neurons in 2nd FC Layer & 6                         \\ \hline
+		Metric                  & Categorical Cross-Entropy \\ \hline
+		Epochs                  & 50                        \\ \hline
+	\end{tabular}
+	\caption{Hyperparameter Table, Run 4.}
+	\label{tab:parameters_4}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+		Algorithm         & Model Loss     & Model Accuracy \\ \hline
+		\textbf{Adadelta} & \textbf{1.0\%} & \textbf{0.7\%} \\ \hline
+		Adagrad           & 1.1\%          & 0.7\%          \\ \hline
+		Adam              & 1.1\%          & 0.7\%          \\ \hline
+		RMSProp           & 1.2\%          & 0.7\%          \\ \hline
+		SGD               & 1.1\%          & 0.5\%          \\ \hline
+		\end{tabular}
+	\caption{Results Table, Run 4.}
+	\label{tab:results_4}
+\end{table}
+
+\ \
+
+\begin{figure}[H]
+   \centering
+	\includegraphics[scale=0.20]{figure_34.pdf}
+	\caption{Results Graphs, Run 4.}
+	\label{fig:results_graphs_4}
+\end{figure}
+
+
+\subsection{Run 5}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		Parameter               			& Value                     \\ \hline
+		1st Layer               			& 3x3 Convolution           \\ \hline
+		2nd Layer               			& 2x2 Maxpooling            \\ \hline
+		\textbf{Dropout}        			& \textbf{50\%}             \\ \hline
+		Neurons in 1st FC Layer 			& 512                       \\ \hline
+		Neurons in 2nd FC Layer 			& 6                         \\ \hline
+		Metric                  			& Categorical Cross-Entropy \\ \hline
+		Epochs                  			& 50                        \\ \hline
+		\textbf{Learning Rate}\footnote[1]  & \textbf{0.01}             \\ \hline
+	\end{tabular}
+	\caption{Hyperparameter Table, Run 5.}
+	\label{tab:parameters_5}
+\end{table}
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+	\hline
+		Algorithm            & Model Loss     & Model Accuracy \\ \hline
+		\textbf{Adadelta}    & \textbf{0.6\%} & \textbf{0.8\%} \\ \hline
+		Adagrad              & 11.1\%         & 0.3\%          \\ \hline
+		Adam                 & 10.8\%         & 0.3\%          \\ \hline
+		Rmsprop              & 2.2\%          & 0.8\%          \\ \hline
+		SGD\footnote[1] 	 & 0.9\%          & 0.7\%          \\ \hline
+		\end{tabular}
+	\caption{Results Table, Run 5.}
+	\label{tab:results_5}
+\end{table}
+
+\ \
+
+\begin{figure}[H]
+   \centering
+	\includegraphics[scale=0.20]{figure_35.pdf}
+	\caption{Results Graphs, Run 5.}
+	\label{fig:results_graphs_5}
+\end{figure}
+
+
+\footnotetext[1]{SGD learning rate ($\eta$) was set to 0.01, with the momentum ($\gamma$) set to 0.9 and using \textbf{Nesterov Accelerated Gradient} (NAG) or \texttt{nesterov}.}
+
+\ \
+
+Having tested the algorithms for 5 test runs, the results of the best performing optimisation algorithms were collected and it was shown that \textbf{SGD} and \textbf{Adadelta} fit the model better throughout all of the 5 test runs for 50 epochs. Table \ref{tab:best_of_5_results} shows the best results for all the test runs. Numerically, the best performing algorithm was \textbf{Adadelta} with a model loss of \textbf{$\sim$60\%} and a model accuracy of \textbf{$\sim$80\%}, \textbf{SGD} came in second  with a model loss of \textbf{$\sim$80\%} and a model accuracy of \textbf{$\sim$80\%}. In the other test runs, RMSProp seemed to have overfitted the model with the highest model loss in all test runs. 
+
+Adagrad seemed to have performed the same as RMSProp. Adam sometimes overfits the model and underperforms in the last test run, but has performance comparable to Adadelta. SGD had consistent performance for 3 test runs which one could even argue that Adadelta could have had the best model by chance. But the results show that \textbf{SGD} and \textbf{Adadelta} seem to be the best choice for this dataset. It may be interesting to see what happens if the epochs are increased for both \textbf{SGD} and \textbf{Adadelta} to find out if that separates the two and still fits the model. But due to time constraints and only one GPU, the epochs are reduced. 
+
+While \textbf{Adadelta} is the best according to the results, \textbf{SGD} seems to be \textit{better} due to it's consistent accuracy for three test runs, despite it's first test model loss being 20\% lower than \textbf{Adadelta}. Emotion classification results using different algorithms are shown in Appendix \ref{appendix:D}.
+
+\ \ \ \ \ \ 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+Run        & Algorithm         & Model Loss     & Model Accuracy \\ \hline
+1          & SGD               & 0.8\%          & 0.8\%          \\ \hline
+2          & SGD               & 0.9\%          & 0.8\%          \\ \hline
+3          & SGD               & 1.0\%          & 0.8\%          \\ \hline
+4          & Adadelta          & 1.0\%          & 0.7\%          \\ \hline
+\textbf{5} & \textbf{Adadelta} & \textbf{0.6\%} & \textbf{0.8\%} \\ \hline
+\end{tabular}
+\caption{Algorithms with the best loss accuracy out of all 5 runs.}
+\label{tab:best_of_5_results}
+\end{table}
+
+
+%% ---------------------------------------------------------------
+%%
+%% Reflection
+%%
+%% ---------------------------------------------------------------
+
+\lhead{\emph{Testing \& Evaluation}}
+\chapter{Reflection} \label{chap:reflection}
+\lhead{\emph{Reflection}}
+
+In retrospect, the results of training the dataset could be further improved if more emotions were added. Currently there exists only the three emotions that have been analysed in this report. The network was  shallower than I had expected and had lots of overfitting issues when testing with more layers of convolutions and maxpooling, in Table \ref{tab:parameters_3} and \ref{tab:parameters_4} adding more layers to the network was overfitting the dataset. Increasing the dropout helped slightly in \ref{tab:parameters_4} but I think that it would perform better if more emotions and data was added to the dataset, which only then this would constitute looking at a more deeper architecture. \citeauthor{Goodfellow-et-al-2016} explains that deeper networks use few parameters per layer and are able to generalise the test set, but are harder to optimise \citeyearpar[192]{Goodfellow-et-al-2016}. In addition, If more time was possible, adding more training/testing data than the 400 would be one of the things I would do differently.
+
+\ \
+
+I didn't consider using a pre-trained model such as VGG16 or Resnet and fine tuning it; although I was aware of such models and methods. In the future, this would be an ideal starting point to compare the pre-trained models against this model that was trained from scratch.
+
+\ \
+
+ Looking back at the original risk matrix, the first risk was mitigated, effective and led to the success of the project. The second risk was not an issue since only 64 videos were used and I only focused on the main characters since they appeared more than the rest of them. This project would not be feasible for more than two or three characters because a lot of time would need to be invested to segment the faces. For N \textless \  3 characters, segmenting N characters may not scale in practice and will take too much time. 
+ 
+ \ \
+ 
+ The third risk was the second highest in impact because the data preparation was the longest in practice. It was unlikely to find an existing one online. But constructing the dataset was a great experience and may even be used in other applications if open sourced online. The fourth risk was never met since the dataset was small in size to begin with; in terms of the 400 test/training emotions. Finally, the last risk did not happen. Yet, the artefact does misclassify some images but not to warrant an entirely new dataset. 
+ 
+ \ \
+ 
+\begin{table}[H]
+\centering
+\begin{tabularx}{\linewidth}{|X|c|c|c|X|}
+\hline \multicolumn{1}{|c|}{Risk} & \multicolumn{1}{c|}{Likelihood} & \multicolumn{1}{c|}{Impact} & \multicolumn{1}{c|}{Risk Quotient}  & \multicolumn{1}{|c|}{Contingency}  \tabularnewline \hline
+Large number of data, many parameters.         & 5            & 4   & 20 & Clean dataset and reduce to only 3 emotions.        			 \tabularnewline \hline
+Analysing the set of all cartoons for emotions.         & 2            & 0.6   & 1.2 & Only choose cartoons/animations with only high emotion         \tabularnewline \hline
+Cannot find relevant dataset.         & 4            & 9   & 36 & Research or filter ImageNet dataset or construct a new dataset by hand ahead of training and design.         \tabularnewline \hline
+Bad parameters.         & 6            & 7   & 3 & Reduce the dataset if it is too large.         \tabularnewline \hline
+Cannot detect emotion in character.         & 5            & 10   & 50 & Quickly find another cartoon dataset or decide on another cartoon to analyse.         \tabularnewline \hline
+
+
+\end{tabularx}
+\caption{The original risk matrix from project proposal}
+\label{tab:risk_matrix}
+\end{table}
+
+Nevertheless, I think this project does show promise of the possibility of combining deep learning, emotion recognition and cartoons. Animators that work in the 2D cartoons domain, illustrators and cartoonists would benefit from this work or variants of it. I think this project is a step forward, but there exists some room for further improvements. 
+
+%% ---------------------------------------------------------------
+%%
+%% Appendices
+%%
+%% ---------------------------------------------------------------
+
+\addtocontents{toc}{\vspace{2em}} % Add a gap in the Contents, for aesthetics
+
+\appendix % Cue to tell LaTeX that the following 'chapters' are Appendices
+
+%% ---------------------------------------------------------------
+%%
+%% Appendix A - Cartoon Face Segmentation Tool
+%%
+%% ---------------------------------------------------------------
+
+\chapter{Cartoon Face Segmentation}
+\lhead{\emph{Appendix A}}
+\label{appendix:A}
+
+The following code below segments a face from a cartoon for dataset preparation.
+
+\inputminted[frame=single, framesep=2mm, baselinestretch=1.2, fontsize=\footnotesize, linenos,breaklines=true,breaksymbolleft=]{python}{segmentation.py}
+\captionof{listing}{The source code for the cartoon face segmentation tool. It reads a series of videos and saves a detected face by using a custom Haar cascade. Only the two characters \textit{Tom} \& \textit{Jerry} have separate Haar cascades.}
+
+%% ---------------------------------------------------------------
+%%
+%% Appendix B - All cartoons included in dataset
+%%
+%% ---------------------------------------------------------------
+
+\chapter{List of Episodes in Dataset}
+\lhead{\emph{Appendix B}}
+\label{appendix:B}
+
+Below is a list of \textit{Tom \& Jerry} episodes that are used and included in the dataset, and have been created from scratch.
+
+\begin{table}[]
+\begin{tabular}{l|l|}
+\hline
+\multicolumn{1}{|l|}{Episode} & Duration \\ \hline
+\multicolumn{1}{|l|}{\textit{The Million Dollar Cat (1944)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Bodyguard (1944)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Puttin’ on the Dog (1944)}} & 2:09 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Mouse Comes to Dinner (1945)}} & 2:16 \\ \hline
+\multicolumn{1}{|l|}{\textit{Mouse in Manhattan (1945)}} & 2:35 \\ \hline
+\multicolumn{1}{|l|}{\textit{Tee for Two (1945)}} & 2:14 \\ \hline
+\multicolumn{1}{|l|}{\textit{Flirty Birdy (1945)}} & 2:10 \\ \hline
+\multicolumn{1}{|l|}{\textit{Quiet Please! (1945)}} & 2:21 \\ \hline
+\multicolumn{1}{|l|}{\textit{Springtime for Thomas (1946)}} & 2:43 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Milky Waif (1946)}} & 2:21 \\ \hline
+\multicolumn{1}{|l|}{\textit{Trap Happy (1946)}} & 2:10 \\ \hline
+\multicolumn{1}{|l|}{\textit{Solid Serenade (1946)}} & 2:38 \\ \hline
+\multicolumn{1}{|l|}{\textit{Cat Fishin' (1947)}} & 2:17 \\ \hline
+\multicolumn{1}{|l|}{\textit{Part Time Pal (1947)}} & 2:53 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Cat Concerto (1947)}} & 1:44 \\ \hline
+\multicolumn{1}{|l|}{\textit{Dr. Jekyll and Mr. Mouse (1947)}} & 2:25 \\ \hline
+\multicolumn{1}{|l|}{\textit{Salt Water Tabby (1947)}} & 2:15 \\ \hline
+\multicolumn{1}{|l|}{\textit{A Mouse in the House (1947)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Invisible Mouse (1947)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Kitty Foiled (1948)}} & 2:57 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Truce Hurts (1948)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Old Rockin' Chair Tom (1948)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Professor Tom (1948)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Mouse Cleaning (1948)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Polka Dot Puss (1949)}} & 2:56 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Little Orphan (1949)}} & 2:55 \\ \hline
+\multicolumn{1}{|l|}{\textit{Hatch Up Your Troubles (1949)}} & 2:58 \\ \hline
+\multicolumn{1}{|l|}{\textit{Heavenly Puss (1949)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Cat and the Mermouse (1949)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Love That Pup (1949)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Jerry's Diary (1949)}} & 3:00 \\ \hline
+\end{tabular}
+\centering
+\caption{The first 32 \textit{Tom \& Jerry} episodes of the images that are included in the dataset of this project.}
+\label{tab:dataset_videos_1}
+\end{table}
+
+\begin{table}[]
+\begin{tabular}{l|l|}
+\hline
+\multicolumn{1}{|l|}{Episode} & Duration \\ \hline
+\multicolumn{1}{|l|}{\textit{Tennis Chumps (1949)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Little Quacker (1950)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Saturday Evening Puss (1950)}} & 2:57 \\ \hline
+\multicolumn{1}{|l|}{\textit{Texas Tom (1950)}} & 2:58 \\ \hline
+\multicolumn{1}{|l|}{\textit{Jerry and the Lion (1950)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Safety Second (1950)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Hollywood Bowl (1950)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Framed Cat (1950)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Cue Ball Cat (1950)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Casanova Cat (1951)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Jerry and the Goldfish (1951)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Jerry's Cousin (1951)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Sleepy Time Tom (1951)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{His Mouse Friday (1951)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Slicked up Pup (1951)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Nit Witty Kitty (1951)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Cat Napping (1951)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Flying Cat (1952)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Duck Doctor (1952)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Two Mouseketeers (1952)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Triplet Trouble (1952)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Fit to be Tied (1952)}} & 2:58 \\ \hline
+\multicolumn{1}{|l|}{\textit{The Missing Mouse (1953)}} & 2:58 \\ \hline
+\multicolumn{1}{|l|}{\textit{Jerry and Jumbo (1953)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Johann Mouse (1953)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Two Little Indians (1953)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Life with Tom (1953)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Hic cup Pup (1954)}} & 2:58 \\ \hline
+\multicolumn{1}{|l|}{\textit{Baby Butch (1954)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Mice Follies (1954)}} & 3:00 \\ \hline
+\multicolumn{1}{|l|}{\textit{Neapolitan Mouse (1954)}} & 2:59 \\ \hline
+\multicolumn{1}{|l|}{\textit{Pet Peeve (1954)}} & 2:59 \\ \hline
+\end{tabular}
+\centering
+\caption{The last 32 \textit{Tom \& Jerry} episodes of the images that are included in the dataset of this project.}
+\label{tab:dataset_videos_2}
+\end{table}
+
+%% ---------------------------------------------------------------
+%%
+%% Appendix C - Classification Tool
+%%
+%% ---------------------------------------------------------------
+
+\chapter{Classification}
+\lhead{\emph{Appendix C}}
+\label{appendix:C}
+
+The following code below classifies a randomly selected face of any of the 3 emotions from the test set. By default, \texttt{-t} trains the model and \texttt{-t -V} trains and classifies the test dataset. Other operations include creating visualisations of  convolution layers and the output layer. 
+\\
+
+\inputminted[frame=single, framesep=2mm, baselinestretch=1.2, fontsize=\footnotesize, linenos,breaklines=true,breaksymbolleft=]{python}{train.py}
+\captionof{listing}{The source code for the training, classification and visualisation tool.}
+
+%% ---------------------------------------------------------------
+%%
+%% Appendix D - Emotion Classification Results
+%%
+%% ---------------------------------------------------------------
+
+\chapter{Emotion Classification Results}
+\lhead{\emph{Appendix D}}
+\label{appendix:D}
+
+The following images are the results of emotion classification of the test set that are classified by the artefact. The best models from 1-5 runs of the algorithm including two of the best models in Table \ref{tab:best_of_5_results} are shown below. Each image shows a prediction, green indicates a correct prediction. Red indicates misclassification with the correct label (also in green). 
+\\
+
+\begin{figure}[h]
+	\begin{subfigure}{0.54\textwidth}
+		\includegraphics[scale=0.125]{figure_36.pdf}
+		\caption{\tiny{Tested on best model for Adadelta, in Table \ref{tab:parameters_5}}}
+	\end{subfigure}
+	\label{fig:emotion_classification_adadelta}
+	\unskip \vrule\
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[scale=0.125]{figure_40.pdf}
+		\caption{\tiny{Tested on best model for SGD, in Table \ref{tab:parameters_1}}}
+	\end{subfigure}
+	\label{fig:emotion_classification_sgd}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{subfigure}{0.54\textwidth}
+		\includegraphics[scale=0.125]{figure_38.pdf}
+		\caption{\tiny{Tested on best model for Adam, in Table \ref{tab:parameters_3}}}
+	\end{subfigure}
+	\label{fig:emotion_classification_adam}
+	\unskip \vrule\
+	\begin{subfigure}{0.5\textwidth}
+		\includegraphics[scale=0.125]{figure_37.pdf}
+		\caption{\tiny{Tested on best model for Adagrad, in Table \ref{tab:parameters_2}}}
+	\end{subfigure}
+	\label{fig:emotion_classification_adagrad}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{0.54\textwidth}
+		\includegraphics[scale=0.125]{figure_39.pdf}
+		\caption{\tiny{Tested on best model for RMSProp, in Table \ref{tab:parameters_4}}}
+	\end{subfigure}
+	\label{fig:emotion_classification_rmsprop}
+\end{figure}
+
+\addtocontents{toc}{\vspace{2em}}  % Add a gap in the Contents, for aesthetics
+\backmatter
+
+%% ----------------------------------------------------------------
+\label{References}
+\lhead{\emph{References}}  % Change the left side page header to "References"
+\printbibliography[title={References}] % Print References
+\end{document}  % The End
