@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+authors:
+- family-names: Hill
+  given-names: John Wesley
+  affiliation: The University of Lincoln, UK
+title: Deep Learning for Emotion Recognition in Cartoons
+version: 1.0.0
+date-released: 2017-06-05
+url: https://hako.github.io/dissertation
+repository-code: https://github.com/hako/dissertation
+license: BSD-2-Clause
